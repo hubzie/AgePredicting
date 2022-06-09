@@ -6,9 +6,10 @@
 #include<vector>
 
 struct FileNotFound : std::exception {};
+const int DEF_SIZE = 48*48;
 
 struct Data {
-    Eigen::Matrix<double, 48*48, 1> x;
+    Eigen::VectorXd x;
     short y;
 };
 
