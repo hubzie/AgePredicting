@@ -25,11 +25,13 @@ vector<Data> fromFile(const string& path) {
         Data d;
         parser >> d.y;
         string junk;
-        // Ignore ethnicity gender and img_name
+        // Ignore ethnicity, gender and img_name
         parser >> junk >> junk >> junk;
 
         double value;
         int it = 0;
+
+        d.x.resize(DEF_SIZE);
         while(parser >> value)
             d.x(it++) = value;
 
