@@ -1,5 +1,6 @@
 #include<Eigen/Core>
 #include<iostream>
+#include<fstream>
 using namespace std;
 
 #include"Utils.hpp"
@@ -15,8 +16,16 @@ int main() {
     for(auto& r : data)
         r.x = pca.transform(r.x);
 
-//    for(auto& r : data)
-//        cout << r.x.transpose() << "\n";
+    {
+        ofstream demo("../../demo/pca.data");
+        for (auto &r: data)
+            demo << r.x.transpose() << "\n";
+    }
+
+    {
+        ofstream demoV("../../demo/pca_v.data");
+        demoV << pca.getV();
+    }
 
     return 0;
 }
