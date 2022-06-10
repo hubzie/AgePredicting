@@ -9,11 +9,23 @@ find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 add_library(utils SHARED utils/Utils.cpp)
 target_link_libraries(utils Eigen3::Eigen)
 
-set(LIBS Eigen3::Eigen utils)
+# Models
+add_library(model SHARED model/Model.cpp)
+target_link_libraries(model Eigen3::Eigen)
+
+# SVM
+add_library(lsvm SHARED svm/LinearSVM.cpp)
+target_link_libraries(lsvm model)
+
+# Libraries
+set(LIBS Eigen3::Eigen utils model lsvm)
 
 # Directories
-include_directories(utils)
+include_directories(utils model svm)
 
 # Executables
 add_executable(parser parser.cpp)
 target_link_libraries(parser ${LIBS})
+
+add_executable(svm svm.cpp)
+target_link_libraries(svm ${LIBS})
