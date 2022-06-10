@@ -6,7 +6,7 @@ import numpy as np
 plt.rcParams['image.cmap'] = 'gray'
 
 with open('pca.data') as file:
-	x = np.loadtxt(file)
+	x = np.delete(np.loadtxt(file), 0, 1)
 with open('pca_v.data') as file:
 	v = np.loadtxt(file).transpose()
 
