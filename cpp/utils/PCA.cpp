@@ -22,6 +22,7 @@ PCA::PCA(const std::vector<Data>& data) {
     mean /= n;
     for(int i=0;i<n;i++) X.row(i) -= mean;
 
+    cerr << "PCA: Dataset size = " << n << endl;
     cerr << "PCA: Compression rate = " << COMPRESSION << endl;
     cerr << "PCA: Computing SVD decomposition..." << endl;
     BDCSVD svd(X, ComputeFullV);
