@@ -8,7 +8,7 @@
 
 class LinearSVM : public Model {
 //    TODO: make w resizeable
-    Eigen::Vector<double, 48 * 48> w;
+    Eigen::VectorXd w;
     std::list<int> unbound;
     double C, b;
     std::vector<double> a;

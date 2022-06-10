@@ -149,12 +149,11 @@ void LinearSVM::_save(const std::string &filename) const {
     if (!file.is_open())
         throw FileNotFound();
 
-    for (const double &coeff : w)
-        file << coeff << ' ';
-    file << b << '\n';
+    file << w.transpose() << " " << b << '\n';
     file.close();
 }
 
-LinearSVM::LinearSVM(const int &width, const double &C) : w(), C(C), b(0.0) {
+LinearSVM::LinearSVM(const int &width, const double &C): C(C), b(0.0) {
+    w = Eigen::VectorXd::Zero(width);
     gen = std::mt19937(rd());
 }
