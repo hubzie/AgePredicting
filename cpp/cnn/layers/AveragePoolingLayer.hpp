@@ -2,12 +2,12 @@
 
 #include"Layer.hpp"
 
-class SigmoidLayer : public Layer {
-    std::pair<int,int> size;
+class AveragePoolingLayer : public Layer {
+    std::pair<int,int> inputSize, poolSize;
 
 public:
 
-    SigmoidLayer(std::pair<int,int> size);
+    AveragePoolingLayer(std::pair<int,int> inputSize, std::pair<int,int> poolSize);
 
     std::pair<int,int> getInputSize() const override;
     std::pair<int,int> getOutputSize() const override;

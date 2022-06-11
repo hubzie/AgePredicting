@@ -18,7 +18,7 @@ MatrixXd FullConnectedLayer::forward(MatrixXd input) const {
     return W * input + b;
 }
 
-MatrixXd FullConnectedLayer::backward(MatrixXd input, MatrixXd error) const {
+MatrixXd FullConnectedLayer::backward(MatrixXd, MatrixXd error) const {
     return W.transpose() * error;
 }
 

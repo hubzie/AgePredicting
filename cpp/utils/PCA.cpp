@@ -8,7 +8,7 @@
 using namespace Eigen;
 using namespace std;
 
-PCA::PCA(const std::vector<Data>& data) {
+PCA::PCA(const std::vector<Data>& data, double compression) {
     assert(!data.empty());
 
     int n = data.size(), m = data[0].x.size();
@@ -23,14 +23,14 @@ PCA::PCA(const std::vector<Data>& data) {
     for(int i=0;i<n;i++) X.row(i) -= mean;
 
     cerr << "PCA: Dataset size = " << n << endl;
-    cerr << "PCA: Compression rate = " << COMPRESSION << endl;
+    cerr << "PCA: Compression rate = " << compression << endl;
     cerr << "PCA: Computing SVD decomposition..." << endl;
     BDCSVD svd(X, ComputeFullV);
 
     double frac = 0.0;
     auto s = svd.singularValues();
     for(int i=0;i<s.size();i++) frac += s(i)*s(i);
-    frac *= COMPRESSION;
+    frac *= compression;
 
     int l = 0;
     double sum = 0.0;

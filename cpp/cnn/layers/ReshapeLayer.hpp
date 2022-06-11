@@ -2,12 +2,12 @@
 
 #include"Layer.hpp"
 
-class SigmoidLayer : public Layer {
-    std::pair<int,int> size;
+class ReshapeLayer : public Layer {
+    std::pair<int,int> inputSize, outputSize;
 
 public:
 
-    SigmoidLayer(std::pair<int,int> size);
+    ReshapeLayer(std::pair<int,int> inputSize, std::pair<int,int> outputSize);
 
     std::pair<int,int> getInputSize() const override;
     std::pair<int,int> getOutputSize() const override;
