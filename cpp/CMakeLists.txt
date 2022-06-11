@@ -34,6 +34,7 @@ target_link_libraries(multi_lsvm utils model lsvm)
 # CNN
 add_library(lcnn SHARED cnn/CNN.cpp
         cnn/layers/AveragePoolingLayer.cpp
+        cnn/layers/ConvolutionalLayer.cpp
         cnn/layers/FullConnectedLayer.cpp
         cnn/layers/MaxPoolingLayer.cpp
         cnn/layers/ReLuLayer.cpp

@@ -2,6 +2,7 @@
 #include"Utils.hpp"
 
 #include<algorithm>
+#include<fstream>
 #include<iostream>
 #include<iomanip>
 #include<map>
@@ -67,15 +68,31 @@ void pure_nn() {
 
 void cnn() {
     cerr << "Loading data..." << endl;
-    auto data = fromFile("../../data/age_gender.csv");
-    for(auto& d : data)
-        for(int i=0;i<d.x.size();i++)
-            d.x(i) /= 256.0;
 
-    data.erase(remove_if(data.begin(),
-                         data.end(),
-                         [](const Data& x){ return x.y != 10 && x.y != 30; }),
-               data.end());
+    vector<Data> data;
+
+    try {
+        data = fromParsedFile("../../demo/cnn.data");
+    } catch(const FileNotFound& e) {
+        cout << "Prepare data..." << endl;
+
+        data = fromFile("../../data/age_gender.csv");
+        for (auto &d: data)
+            for (int i = 0; i < d.x.size(); i++)
+                d.x(i) /= 256.0;
+
+        data.erase(remove_if(data.begin(),
+                             data.end(),
+                             [](const Data &x) { return x.y != 2 && x.y != 50; }),
+                   data.end());
+
+        {
+            cout << "Save for future runs..." << endl;
+            ofstream file("../../demo/cnn.data");
+            for (auto &d: data)
+                file << d << "\n";
+        }
+    }
 
     map<int,int> cnt;
     for(auto& d : data) cnt[d.y]++;
@@ -98,14 +115,26 @@ void cnn() {
 
     cerr << "Building CNN..." << endl;
     CNN model({48*48, 1});
+
     model.addLayer(new ReshapeLayer({48*48, 1}, {48, 48}));
-    model.addLayer(new MaxPoolingLayer({48, 48}, {2, 2}));
-    model.addLayer(new SigmoidLayer({24, 24}));
-    model.addLayer(new AveragePoolingLayer({24, 24}, {2, 2}));
-    model.addLayer(new SigmoidLayer({12, 12}));
-    model.addLayer(new ReshapeLayer({12, 12}, {12*12, 1}));
-    model.addLayer(new FullConnectedLayer(12*12, cnt.size()));
-    model.addLayer(new SigmoidLayer({cnt.size(), 1}));
+
+    model.addLayer(new ConvolutionalLayer({48, 48}, {5, 5}));
+    model.addLayer(new MaxPoolingLayer({44, 44}, {2, 2}));
+    model.addLayer(new SigmoidLayer({22, 22}));
+
+    model.addLayer(new ConvolutionalLayer({22, 22}, {5, 5}));
+    model.addLayer(new AveragePoolingLayer({18, 18}, {2, 2}));
+    model.addLayer(new SigmoidLayer({9, 9}));
+
+    model.addLayer(new ReshapeLayer({9, 9}, {9*9, 1}));
+
+    model.addLayer(new FullConnectedLayer(9*9, 40));
+    model.addLayer(new SigmoidLayer({40, 1}));
+
+    model.addLayer(new FullConnectedLayer(40, 16));
+    model.addLayer(new SigmoidLayer({16, 1}));
+
+    model.addLayer(new FullConnectedLayer(16, cnt.size()));
 
     cerr << "Training..." << endl;
     model.train(train);
