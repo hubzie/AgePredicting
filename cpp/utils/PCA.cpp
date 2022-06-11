@@ -25,7 +25,7 @@ PCA::PCA(const std::vector<Data>& data) {
     cerr << "PCA: Dataset size = " << n << endl;
     cerr << "PCA: Compression rate = " << COMPRESSION << endl;
     cerr << "PCA: Computing SVD decomposition..." << endl;
-    BDCSVD svd(X, ComputeFullV);
+    BDCSVD<MatrixXd> svd(X, ComputeFullV);
 
     double frac = 0.0;
     auto s = svd.singularValues();

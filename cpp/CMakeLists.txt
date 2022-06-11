@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 project(cpp)
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O3")
 
 # Multithreading
 find_package(OpenMP)
@@ -12,7 +12,7 @@ if (OPENMP_FOUND)
 endif()
 
 # Eigen3
-find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+find_package(Eigen3 3.4 REQUIRED NO_MODULE)
 
 # Utils
 add_library(utils SHARED utils/Utils.cpp utils/PCA.cpp)
@@ -23,11 +23,8 @@ add_library(model SHARED model/Model.cpp)
 target_link_libraries(model Eigen3::Eigen)
 
 # SVM
-add_library(lsvm SHARED svm/LinearSVM.cpp)
-target_link_libraries(lsvm model)
-
-add_library(multi_lsvm svm/MultiClassLinearSVM.cpp)
-target_link_libraries(multi_lsvm utils model lsvm)
+add_library(lsvm SHARED svm/LinearSVM.cpp svm/MultiClassLinearSVM.cpp)
+target_link_libraries(lsvm model utils)
 
 # CNN
 add_library(lcnn SHARED cnn/CNN.cpp
