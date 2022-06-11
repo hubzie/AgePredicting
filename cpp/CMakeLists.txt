@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.22)
 project(cpp)
 set(CMAKE_CXX_STANDARD 17)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+
 # Multithreading
 find_package(OpenMP)
 if (OPENMP_FOUND)
@@ -25,8 +27,11 @@ target_link_libraries(model Eigen3::Eigen)
 add_library(lsvm SHARED svm/LinearSVM.cpp)
 target_link_libraries(lsvm model)
 
+add_library(multi_lsvm svm/MultiClassLinearSVM.cpp)
+target_link_libraries(multi_lsvm utils model lsvm)
+
 # Libraries
-set(LIBS Eigen3::Eigen utils model lsvm)
+set(LIBS Eigen3::Eigen utils model lsvm multi_lsvm)
 
 # Directories
 include_directories(utils model svm)
