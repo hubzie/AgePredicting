@@ -6,6 +6,7 @@
 
 #include"Layer.hpp"
 #include"layers/FullConnectedLayer.hpp"
+#include"layers/SigmoidLayer.hpp"
 
 class CNN {
     std::pair<int,int> inputSize, outputSize;

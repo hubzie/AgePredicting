@@ -29,6 +29,7 @@ target_link_libraries(lsvm model)
 # CNN
 add_library(lcnn SHARED cnn/CNN.cpp
         cnn/layers/FullConnectedLayer.cpp
+        cnn/layers/SigmoidLayer.cpp
         )
 target_link_libraries(lcnn Eigen3::Eigen)
 
