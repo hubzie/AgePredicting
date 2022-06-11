@@ -49,6 +49,9 @@ static vector<Data> readFromFile(const string& path, bool isParsed) {
         buff.clear();
         while(parser >> value)
             buff.push_back(value);
+
+        if(buff.size() == 0) continue;
+
         d.x = VectorXd(buff.size());
         for(int i=0;i<buff.size();i++)
             d.x(i) = buff[i];
