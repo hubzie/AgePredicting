@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 project(cpp)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -O3")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
@@ -30,11 +31,18 @@ target_link_libraries(lsvm model)
 add_library(multi_lsvm svm/MultiClassLinearSVM.cpp)
 target_link_libraries(multi_lsvm utils model lsvm)
 
-# Libraries
-set(LIBS Eigen3::Eigen utils model lsvm multi_lsvm)
+# CNN
+add_library(lcnn SHARED cnn/CNN.cpp
+        cnn/layers/FullConnectedLayer.cpp
+        cnn/layers/SigmoidLayer.cpp
+        )
+target_link_libraries(lcnn Eigen3::Eigen)
 
 # Directories
-include_directories(utils model svm)
+include_directories(utils model svm cnn)
+
+# Libraries
+set(LIBS Eigen3::Eigen utils model lsvm lcnn)
 
 # Executables
 add_executable(parser parser.cpp)
@@ -45,3 +53,6 @@ target_link_libraries(svm ${LIBS})
 
 add_executable(pca_demo pca_demo.cpp)
 target_link_libraries(pca_demo ${LIBS})
+
+add_executable(cnn_demo cnn_demo.cpp)
+target_link_libraries(cnn_demo ${LIBS})
