@@ -9,11 +9,11 @@ int main() {
     standardize(data, mean(data), deviation(data));
 
     for(auto& d : data)
-        d.y = (d.y == 2 ? -1 : 1);
+        d.y = (d.y == 2 ? 0 : 1);
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    MultiClassLinearSVM multi_svm(2, 111);
+    MultiClassLinearSVM multi_svm(2, data[0].x.rows());
     multi_svm.train(data);
     multi_svm.save("../../out/multi_svm.params");
 
