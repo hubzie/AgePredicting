@@ -16,18 +16,18 @@ int main() {
     shuffle(data);
 
     // Extract some data
-    data.erase(remove_if(data.begin(),
+/*    data.erase(remove_if(data.begin(),
                          data.end(),
                          [](const Data& x){ return x.y != 2 && x.y != 50; }),
                data.end());
-
+*/
     cerr << "Splitting data..." << endl;
     auto [fit, test] = split(data, 0.66);
 
-    cerr << "Preparing... " << endl;
-    PCA pca(fit);
+    cerr << "Preparing..." << endl;
+    PCA pca(fit, 0.95);
 
-    cerr << "Compressing... " << endl;
+    cerr << "Compressing..." << endl;
     for(auto& r : data)
         r.x = pca.transform(r.x);
 

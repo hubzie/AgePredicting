@@ -28,7 +28,11 @@ target_link_libraries(lsvm model utils)
 
 # CNN
 add_library(lcnn SHARED cnn/CNN.cpp
+        cnn/layers/AveragePoolingLayer.cpp
         cnn/layers/FullConnectedLayer.cpp
+        cnn/layers/MaxPoolingLayer.cpp
+        cnn/layers/ReLuLayer.cpp
+        cnn/layers/ReshapeLayer.cpp
         cnn/layers/SigmoidLayer.cpp
         )
 target_link_libraries(lcnn Eigen3::Eigen)

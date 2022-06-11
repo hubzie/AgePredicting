@@ -4,15 +4,13 @@
 
 #include"Utils.hpp"
 
-const static double COMPRESSION = 0.95;
-
 class PCA {
     Eigen::MatrixXd V;
     Eigen::VectorXd mean;
 
 public:
 
-    PCA(const std::vector<Data>&);
+    PCA(const std::vector<Data>&, double);
 
     Eigen::VectorXd transform(const Eigen::VectorXd&) const;
     Eigen::MatrixXd getV() const;
