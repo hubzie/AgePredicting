@@ -1,18 +1,13 @@
 #pragma once
 
-#include<Eigen/Dense>
+#include"Layer.hpp"
 
-#include"../Layer.hpp"
-
-class FullConnectedLayer : public Layer {
-    int inputSize, outputSize;
-
-    Eigen::MatrixXd W;
-    Eigen::VectorXd b;
+class SigmoidLayer : public Layer {
+    int size;
 
 public:
 
-    FullConnectedLayer(int inputSize, int outputSize);
+    SigmoidLayer(int size);
 
     std::pair<int,int> getInputSize() const override;
     std::pair<int,int> getOutputSize() const override;
