@@ -31,14 +31,20 @@ void CNN::train(const std::vector<Data>& data) {
     };
 
     // Forward
-    double step = 1.0;
+    double step = 0.1;
     int size = layers.size();
     vector<MatrixXd> input(size + 1), error(size + 1);
 
-    for(int it=1;it<=100*1000;it++) {
+    for(int it=1;it<=50*1000;it++) {
         if(it%1000 == 0) {
-            cerr << "CNN: Iteration #" << it << endl;
             step *= 0.9;
+
+            int cnt = 0;
+            for(auto& d : data)
+                if(d.y == predict(d.x)) cnt++;
+
+            double accuracy = 100.0 * cnt / data.size();
+            cerr << "CNN: Iteration #" << it << ", accuracy = " << accuracy << "%" << endl;
         }
 
         auto& d = data[getIdx(0, data.size()-1)];

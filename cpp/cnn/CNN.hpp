@@ -6,6 +6,7 @@
 
 #include"Layer.hpp"
 #include"layers/AveragePoolingLayer.hpp"
+#include"layers/ConvolutionalLayer.hpp"
 #include"layers/FullConnectedLayer.hpp"
 #include"layers/ReLuLayer.hpp"
 #include"layers/ReshapeLayer.hpp"
