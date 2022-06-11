@@ -8,15 +8,16 @@
 
 class LinearSVM : public Model {
     Eigen::VectorXd w;
-    std::list<int> unbound;
+    std::list<std::pair<int, double>> unbound;
     double C, b;
     std::vector<double> a;
     std::mt19937 gen;
 
     [[nodiscard]] inline double place(const Data &input) const;
     [[nodiscard]] inline bool onBound(const double &a) const;
-    bool update(const int &i1, const int &i2, const Data &d1, const Data &d2);
-    bool examineExample(const int &i2, const std::vector<Data> &d2);
+    bool update(const int &i1, const int &i2, const double &E1, const double &E2, const std::vector<Data> &training);
+    bool examineExample(const int &i2, const double &E2, const std::vector<Data> &training);
+    void refreshCache(const std::vector<Data> &training);
 
     void _train(const std::vector<Data> &training, const std::vector<Data> &validation) override;
     [[nodiscard]] int _call(const Data &input) const override;

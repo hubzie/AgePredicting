@@ -3,7 +3,7 @@
 #include <iostream>
 #include <chrono>
 
-#include "../utils/Utils.hpp"
+#include "Utils.hpp"
 #include "LinearSVM.hpp"
 
 int LinearSVM::_call(const Data &input) const {
@@ -16,12 +16,10 @@ inline double LinearSVM::place(const Data &input) const {
 
 const double eps = 1e-3;
 
-bool LinearSVM::update(const int &i1, const int &i2, const Data &d1, const Data &d2) {
-    const double &y1 = d1.y, &y2 = d2.y;
-    const auto &x1 = d1.x, &x2 = d2.x;
+bool LinearSVM::update(const int &i1, const int &i2, const double &E1, const double &E2, const std::vector<Data> &training) {
+    const double &y1 = training[i1].y, &y2 = training[i2].y;
+    const auto &x1 = training[i1].x, &x2 = training[i2].x;
 
-    const double E1 = place(d1) - y1;
-    const double E2 = place(d2) - y2;
     const double s = y1 == y2 ? 1 : -1;
 
     const double L = std::max(0.0, y1 == y2 ? a[i1] + a[i2] - C : a[i2] - a[i1]);
@@ -61,13 +59,20 @@ bool LinearSVM::update(const int &i1, const int &i2, const Data &d1, const Data 
     else b += .5 * (E1 + E2 + y1 * (a1 - a[i1]) * (K11 + K12) + y2 * (a2 - a[i2]) * (K22 + K12));
 
     if (!onBound(a1) && onBound(a[i1]))
-        unbound.push_back(i1);
+        unbound.emplace_back(i1, E1);
     if (!onBound(a2) && onBound(a[i2]))
-        unbound.push_back(i2);
+        unbound.emplace_back(i2, E2);
     a[i1] = a1;
     a[i2] = a2;
 
+    refreshCache(training);
     return true;
+}
+
+void LinearSVM::refreshCache(const std::vector<Data> &training) {
+    std::for_each(unbound.begin(), unbound.end(), [&](std::pair<int, double> &el) -> void {
+        el.second = place(training[el.first]) - training[el.first].y;
+    });
 }
 
 inline bool LinearSVM::onBound(const double &x) const {
@@ -76,34 +81,34 @@ inline bool LinearSVM::onBound(const double &x) const {
 
 const double tol = 1e-3;
 
-bool LinearSVM::examineExample(const int &i2, const std::vector<Data> &training) {
+bool LinearSVM::examineExample(const int &i2, const double &E2, const std::vector<Data> &training) {
     const double &y2 = training[i2].y;
-    const double E2 = place(training[i2]) - y2;
     const double r2 = E2 * y2;
+    double E1;
     if ((r2 < -tol && a[i2] < C - eps) || (r2 > tol && a[i2] > eps)) {
         int i1 = -1;
         double bestDiff = 0, diff;
         for (auto it = unbound.begin(); it != unbound.end(); ++it) {
-            if (onBound(a[*it])) {
+            if (onBound(a[it->first])) {
                 it = unbound.erase(it);
                 continue;
             }
-            const double E1 = place(training[*it]) - training[*it].y;
-            diff = std::abs(E2 - E1);
+            diff = std::abs(E2 - it->second);
             if (diff > bestDiff + eps) {
                 bestDiff = diff;
-                i1 = *it;
+                i1 = it->first;
+                E1 = it->second;
             }
         }
 
-        if (i1 >= 0 && update(i1, i2, training[i1], training[i2]))
+        if (i1 >= 0 && update(i1, i2, E1, E2, training))
             return true;
 
         std::uniform_int_distribution<size_t> dist(0, training.size() - 1);
         for (auto it = unbound.begin(), pos = std::next(unbound.begin(), dist(gen)); it != unbound.end(); ++it, ++pos) {
             if (pos == unbound.end())
                 pos = unbound.begin();
-            if (update(*pos, i2, training[*pos], training[i2]))
+            if (update(pos->first, i2, pos->second, E2, training))
                 return true;
         }
 
@@ -111,7 +116,7 @@ bool LinearSVM::examineExample(const int &i2, const std::vector<Data> &training)
         for (size_t p = dist(gen); i1 < (int)training.size(); ++i1, ++p) {
             if (p == training.size())
                 p = 0;
-            if (onBound(a[p]) && update((int)p, i2, training[p], training[i2]))
+            if (onBound(a[p]) && update((int)p, i2, place(training[p]) - training[p].y, E2, training))
                 return true;
         }
     }
@@ -127,14 +132,14 @@ void LinearSVM::_train(const std::vector<Data> &training, const std::vector<Data
         change = false;
         if (examineAll)
             for (int i = 0; i < (int)training.size(); ++i)
-                change |= examineExample(i, training);
+                change |= examineExample(i, place(training[i]) - training[i].y, training);
         else {
             for (auto i = unbound.begin(); i != unbound.end(); ++i) {
-                if (onBound(a[*i])) {
+                if (onBound(a[i->first])) {
                     i = unbound.erase(i);
                     continue;
                 }
-                change |= examineExample(*i, training);
+                change |= examineExample(i->first, i->second, training);
             }
         }
         examineAll = !examineAll && !change;
