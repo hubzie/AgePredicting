@@ -3,8 +3,6 @@ project(cpp)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -O3")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
-
 # Multithreading
 find_package(OpenMP)
 if (OPENMP_FOUND)
@@ -48,8 +46,8 @@ set(LIBS Eigen3::Eigen utils model lsvm lcnn)
 add_executable(parser parser.cpp)
 target_link_libraries(parser ${LIBS})
 
-add_executable(svm svm.cpp)
-target_link_libraries(svm ${LIBS})
+add_executable(svm_demo svm_demo.cpp)
+target_link_libraries(svm_demo ${LIBS})
 
 add_executable(pca_demo pca_demo.cpp)
 target_link_libraries(pca_demo ${LIBS})
