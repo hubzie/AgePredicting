@@ -11,7 +11,7 @@ const int REPS = 50;
 const double step = 0.1;
 
 double evaluate(const RegressionCNN& model, const vector<Data>& data) {
-    double score;
+    double score = 0.0;
     for(auto& d : data)
         score += abs(model.predict(d.x) - d.y);
     return score / data.size();
@@ -262,11 +262,12 @@ int main() {
 
     const string path = "../../models/regression_nn/";
     filesystem::create_directories(path);
-
+/*
     test_nn(path+"pca/", "../../data/pca_data/");
     test_nn(path+"kpca_500/", "../../data/kernel_pca_data_500/");
     test_nn(path+"kpca_1000/", "../../data/kernel_pca_data_1000/");
-    test_nn(path+"kpca_2000/", "../../data/kernel_pca_data_2000/");
+    test_nn(path+"kpca_2000/", "../../data/kernel_pca_data_2000/");*/
+    test_cnn(path+"pure/", "../../data/pure_data/");
 
     return 0;
 }
