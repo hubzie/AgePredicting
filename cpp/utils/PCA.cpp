@@ -1,14 +1,15 @@
 #include"PCA.hpp"
 
 #include<Eigen/Eigenvalues>
-#include<vector>
-
+#include<fstream>
 #include<iostream>
+#include<vector>
 
 using namespace Eigen;
 using namespace std;
 
-PCA::PCA(const std::vector<Data>& data, double compression) {
+void PCA::prepare(const vector<Data>& data, double compression) {
+    assert(status == NOT_INITIALIZED);
     assert(!data.empty());
 
     int n = data.size(), m = data[0].x.size();
@@ -43,7 +44,55 @@ PCA::PCA(const std::vector<Data>& data, double compression) {
 
     V = svd.matrixV();
     V.conservativeResize(m, l);
+
+    status = INITIALIZED;
 }
 
-VectorXd PCA::transform(const VectorXd& x) const { return V.transpose() * (x - mean); }
-MatrixXd PCA::getV() const { return V; }
+void PCA::fromFile(const string& path) {
+    assert(status == NOT_INITIALIZED);
+
+    cerr << "PCA: Loading from file..." << endl;
+
+    ifstream file(path);
+    assert(file.is_open());
+
+    string name;
+    assert(file >> name);
+
+    assert(name == NAME);
+
+    int n, m;
+    assert(file >> n >> m);
+
+    mean = VectorXd(n);
+    for(int i=0;i<n;i++)
+        assert(file >> mean(i));
+
+    V = MatrixXd(n,m);
+    for(int i=0;i<n;i++)
+        for(int j=0;j<m;j++)
+            assert(file >> V(i,j));
+
+    status = INITIALIZED;
+}
+
+VectorXd PCA::transform(const VectorXd& x) const {
+    assert(status == INITIALIZED);
+    return V.transpose() * (x - mean);
+}
+
+void PCA::save(const string& path) {
+    assert(status == INITIALIZED);
+
+    cerr << "PCA: Saving..." << endl;
+
+    ofstream file(path);
+    assert(file.is_open());
+
+    cerr << "PCA: Size = "<< V.rows() << "x" << V.cols() << endl;
+
+    file << NAME << "\n";
+    file << V.rows() << " " << V.cols() << "\n";
+    file << mean.transpose() << "\n";
+    file << V << "\n";
+}

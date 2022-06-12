@@ -5,9 +5,12 @@ import numpy as np
 
 plt.rcParams['image.cmap'] = 'gray'
 
-with open('pca.data') as file:
+with open('pca_data.data') as file:
 	x = np.delete(np.loadtxt(file), 0, 1)
-with open('pca_v.data') as file:
+with open('pca.data') as file:
+	file.readline()
+	file.readline()
+	file.readline()
 	v = np.loadtxt(file).transpose()
 
 print(x.shape)

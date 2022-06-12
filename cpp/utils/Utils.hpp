@@ -6,7 +6,7 @@
 
 #include<string>
 #include<vector>
-#include <random>
+#include<random>
 
 struct FileNotFound : std::exception {};
 
@@ -17,8 +17,10 @@ struct Data {
 
 std::ostream& operator<< (std::ostream&, const Data&);
 
-std::vector<Data> fromFile(const std::string& path);
-std::vector<Data> fromParsedFile(const std::string& path);
+std::vector<Data> fromFile(const std::string&);
+std::vector<Data> fromParsedFile(const std::string&);
+
+void save(const std::string&, const std::vector<Data>&);
 
 Eigen::VectorXd mean(const std::vector<Data>&);
 Eigen::VectorXd deviation(const std::vector<Data>&);

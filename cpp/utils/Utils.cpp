@@ -65,7 +65,12 @@ static vector<Data> readFromFile(const string& path, bool isParsed) {
 vector<Data> fromFile(const string& path) { return readFromFile(path, false); }
 vector<Data> fromParsedFile(const string& path) { return readFromFile(path, true); }
 
-
+void save(const string& path, const vector<Data>& data) {
+    ofstream file(path);
+    assert(file.is_open());
+    for(auto& d : data)
+        file << d << "\n";
+}
 
 VectorXd mean(const vector<Data>& data) {
     VectorXd result = VectorXd::Zero(data[0].x.size());

@@ -4,6 +4,8 @@
 
 class Layer {
 public:
+    virtual ~Layer() = default;
+
     virtual std::pair<int,int> getInputSize() const = 0;
     virtual std::pair<int,int> getOutputSize() const = 0;
 

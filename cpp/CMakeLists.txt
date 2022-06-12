@@ -15,8 +15,15 @@ endif()
 find_package(Eigen3 3.4 REQUIRED NO_MODULE)
 
 # Utils
-add_library(utils SHARED utils/Utils.cpp utils/PCA.cpp)
+add_library(utils SHARED utils/Utils.cpp)
 target_link_libraries(utils Eigen3::Eigen)
+
+# PCA
+add_library(lpca SHARED utils/PCA.cpp)
+target_link_libraries(lpca Eigen3::Eigen utils)
+
+add_library(lkernelpca SHARED utils/KernelPCA.cpp)
+target_link_libraries(lkernelpca Eigen3::Eigen utils)
 
 # Models
 add_library(model SHARED model/Model.cpp)
@@ -42,7 +49,7 @@ target_link_libraries(lcnn Eigen3::Eigen)
 include_directories(utils model svm cnn)
 
 # Libraries
-set(LIBS Eigen3::Eigen utils model lsvm lcnn)
+set(LIBS Eigen3::Eigen utils model lpca lkernelpca lsvm lcnn)
 
 # Executables
 add_executable(parser parser.cpp)
@@ -50,6 +57,9 @@ target_link_libraries(parser ${LIBS})
 
 add_executable(svm_demo svm_demo.cpp)
 target_link_libraries(svm_demo ${LIBS})
+
+add_executable(kernel_pca_demo kernel_pca_demo.cpp)
+target_link_libraries(kernel_pca_demo ${LIBS})
 
 add_executable(pca_demo pca_demo.cpp)
 target_link_libraries(pca_demo ${LIBS})

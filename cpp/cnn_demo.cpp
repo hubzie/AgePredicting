@@ -10,16 +10,46 @@
 
 using namespace std;
 
-void pure_nn() {
+vector<Data> load_pca() {
     cerr << "Loading data..." << endl;
-    auto data = fromParsedFile("../../demo/pca.data");
+
+    auto data = fromParsedFile("../../demo/pca_data.data");
     standardize(data, mean(data), deviation(data));
 
     data.erase(remove_if(data.begin(),
                          data.end(),
-                         [](const Data& x){ return x.y != 10 && x.y != 30; }),
+                         [](const Data& x){ return x.y != 23 && x.y != 34; }),
                data.end());
+    return data;
+}
 
+vector<Data> load_kpca() {
+    cerr << "Loading data..." << endl;
+
+    vector<Data> data;
+    try {
+        data = fromParsedFile("../../demo/kpca/cnn.data");
+    } catch(const exception&) {
+        cout << "Prepare data..." << endl;
+
+        data = fromParsedFile("../../demo/kpca/data.data");
+
+        data.erase(remove_if(data.begin(),
+                             data.end(),
+                             [](const Data &x) { return x.y != 23 && x.y != 34; }),
+                   data.end());
+
+        {
+            cout << "Save for future runs..." << endl;
+            ofstream file("../../demo/kpca/cnn.data");
+            for (auto &d: data)
+                file << d << "\n";
+        }
+    }
+    return data;
+}
+
+void pure_nn(vector<Data> data) {
     map<int,int> cnt;
     for(auto& d : data) cnt[d.y]++;
 
@@ -42,7 +72,9 @@ void pure_nn() {
     cerr << "Building CNN..." << endl;
     int inputSize = data[0].x.size();
     CNN model({inputSize, 1});
-    model.addLayer(new FullConnectedLayer(inputSize, 50));
+    model.addLayer(new FullConnectedLayer(inputSize, 200));
+    model.addLayer(new ReLuLayer({200, 1}));
+    model.addLayer(new FullConnectedLayer(200, 50));
     model.addLayer(new ReLuLayer({50, 1}));
     model.addLayer(new FullConnectedLayer(50, cnt.size()));
     model.addLayer(new SigmoidLayer({cnt.size(), 1}));
@@ -73,7 +105,7 @@ void cnn() {
 
     try {
         data = fromParsedFile("../../demo/cnn.data");
-    } catch(const FileNotFound& e) {
+    } catch(const exception&) {
         cout << "Prepare data..." << endl;
 
         data = fromFile("../../data/age_gender.csv");
@@ -83,7 +115,7 @@ void cnn() {
 
         data.erase(remove_if(data.begin(),
                              data.end(),
-                             [](const Data &x) { return x.y != 2 && x.y != 50; }),
+                             [](const Data &x) { return x.y != 23 && x.y != 34; }),
                    data.end());
 
         {
@@ -97,19 +129,25 @@ void cnn() {
     map<int,int> cnt;
     for(auto& d : data) cnt[d.y]++;
 
+    map<int,int> M;
+    {
+        int it = 0;
+        for(auto [k,v] : cnt)
+            M[k] = it++;
+    }
+
+    for(auto& d : data)
+        d.y = M[d.y];
+
+    cnt.clear();
+    for(auto& d : data) cnt[d.y]++;
+
     cerr << "### DATASET ###\n";
     for(auto [k,v] : cnt)
         cerr << "\t" << k << " : " << v << "\n";
     cerr << "### DATASET ###\n" << flush;
 
-    map<int,int> M;
-    {
-        int it = 0;
-        for(auto [k,v] : cnt) M[k] = it++;
-    }
 
-    for(auto& d : data)
-        d.y = M[d.y];
 
     auto [train, test] = split(data, 0.66);
 
@@ -119,22 +157,25 @@ void cnn() {
     model.addLayer(new ReshapeLayer({48*48, 1}, {48, 48}));
 
     model.addLayer(new ConvolutionalLayer({48, 48}, {5, 5}));
-    model.addLayer(new MaxPoolingLayer({44, 44}, {2, 2}));
-    model.addLayer(new SigmoidLayer({22, 22}));
+    model.addLayer(new SigmoidLayer({44, 44}));
 
-    model.addLayer(new ConvolutionalLayer({22, 22}, {5, 5}));
-    model.addLayer(new AveragePoolingLayer({18, 18}, {2, 2}));
-    model.addLayer(new SigmoidLayer({9, 9}));
+    model.addLayer(new ConvolutionalLayer({44, 44}, {5, 5}));
+    model.addLayer(new MaxPoolingLayer({40, 40}, {2, 2}));
+    model.addLayer(new SigmoidLayer({20, 20}));
 
-    model.addLayer(new ReshapeLayer({9, 9}, {9*9, 1}));
+    model.addLayer(new ConvolutionalLayer({20, 20}, {5, 5}));
+    model.addLayer(new AveragePoolingLayer({16, 16}, {2, 2}));
+    model.addLayer(new SigmoidLayer({8, 8}));
 
-    model.addLayer(new FullConnectedLayer(9*9, 40));
-    model.addLayer(new SigmoidLayer({40, 1}));
+    model.addLayer(new ReshapeLayer({8, 8}, {8*8, 1}));
 
-    model.addLayer(new FullConnectedLayer(40, 16));
+    model.addLayer(new FullConnectedLayer(8*8, 30));
+    model.addLayer(new SigmoidLayer({30, 1}));
+
+    model.addLayer(new FullConnectedLayer(30, 16));
     model.addLayer(new SigmoidLayer({16, 1}));
 
-    model.addLayer(new FullConnectedLayer(16, cnt.size()));
+    model.addLayer(new FullConnectedLayer(16, M.size()));
 
     cerr << "Training..." << endl;
     model.train(train);
@@ -144,23 +185,25 @@ void cnn() {
         double acc = 0;
         for(auto& d : train)
             if(d.y == model.predict(d.x)) acc++;
-        cerr << "Training set accuracy = " << 100.0 * acc / train.size() << "%\n";
+        cout << "Training set accuracy = " << 100.0 * acc / train.size() << "%\n";
     }
 
     {
         double acc = 0;
         for(auto& d : test)
             if(d.y == model.predict(d.x)) acc++;
-        cerr << "Test set accuracy = " << 100.0 * acc / test.size() << "%\n";
+        cout << "Test set accuracy = " << 100.0 * acc / test.size() << "%\n";
     }
 }
 
 int main() {
     cerr << fixed << setprecision(3);
+    cout << fixed << setprecision(3);
     srand(time(nullptr));
 
-    //pure_nn();
-    cnn();
+    //pure_nn(load_pca());
+    pure_nn(load_kpca());
+    //cnn();
 
     return 0;
 }
