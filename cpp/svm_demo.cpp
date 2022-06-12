@@ -51,7 +51,8 @@ std::vector<Data> readData() {
         shuffle(data);
 
         std::cerr << "Preparing..." << std::endl;
-        PCA pca(data, 0.95);
+        PCA pca;
+        pca.prepare(data, 0.95);
 
         std::cerr << "Compressing..." << std::endl;
         for (auto &r : data) {
