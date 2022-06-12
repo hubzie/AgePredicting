@@ -65,6 +65,7 @@ vector<Data> fromFile(const string& path) { return readFromFile(path, false); }
 vector<Data> fromParsedFile(const string& path) { return readFromFile(path, true); }
 
 void save(const string& path, const vector<Data>& data) {
+    cerr << "Save to " << path << endl;
     ofstream file(path);
     assert(file.is_open());
     for(auto& d : data)
