@@ -34,7 +34,7 @@ add_library(lsvm SHARED svm/LinearSVM.cpp svm/MultiClassLinearSVM.cpp svm/Kernel
 target_link_libraries(lsvm model utils)
 
 # CNN
-add_library(lcnn SHARED cnn/CNN.cpp
+add_library(lcnn SHARED cnn/CNN.cpp cnn/RegressionCNN.cpp
         cnn/layers/AveragePoolingLayer.cpp
         cnn/layers/ConvolutionalLayer.cpp
         cnn/layers/FullConnectedLayer.cpp
@@ -66,3 +66,6 @@ target_link_libraries(pca_demo ${LIBS})
 
 add_executable(cnn_demo cnn_demo.cpp)
 target_link_libraries(cnn_demo ${LIBS})
+
+add_executable(reg_cnn_demo regression_cnn_demo.cpp)
+target_link_libraries(reg_cnn_demo ${LIBS})

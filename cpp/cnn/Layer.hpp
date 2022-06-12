@@ -5,6 +5,7 @@
 class Layer {
 protected:
     friend class CNN;
+    friend class RegressionCNN;
 
     virtual void load(const std::string&) = 0;
     virtual void save(const std::string&) const = 0;

@@ -4,6 +4,7 @@
 
 class ReLuLayer : public Layer {
     friend class CNN;
+    friend class RegressionCNN;
     static const std::string NAME;
 
     std::pair<int,int> size;

@@ -6,6 +6,7 @@
 
 class FullConnectedLayer : public Layer {
     friend class CNN;
+    friend class RegressionCNN;
     static const std::string NAME;
 
     int inputSize, outputSize;
