@@ -14,13 +14,18 @@
 #include"layers/MaxPoolingLayer.hpp"
 
 class CNN {
+    static const std::string NAME;
+
     std::pair<int,int> inputSize, outputSize;
     std::vector<Layer*> layers;
 
 public:
 
     CNN(std::pair<int,int> inputSize);
+    CNN(const std::string& path);
     virtual ~CNN();
+
+    void save(const std::string& path);
 
     std::pair<int,int> getInputSize() const;
     std::pair<int,int> getOutputSize() const;

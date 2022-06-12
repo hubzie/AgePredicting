@@ -3,7 +3,17 @@
 #include"Layer.hpp"
 
 class ReLuLayer : public Layer {
+    friend class CNN;
+    static const std::string NAME;
+
     std::pair<int,int> size;
+
+    ReLuLayer() = default;
+
+    void load(const std::string&) override;
+    void save(const std::string&) const override;
+
+    std::string getName() const override;
 
 public:
 

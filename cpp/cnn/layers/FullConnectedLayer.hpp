@@ -5,10 +5,20 @@
 #include"../Layer.hpp"
 
 class FullConnectedLayer : public Layer {
+    friend class CNN;
+    static const std::string NAME;
+
     int inputSize, outputSize;
 
     Eigen::MatrixXd W;
     Eigen::VectorXd b;
+
+    FullConnectedLayer() = default;
+
+    void load(const std::string&) override;
+    void save(const std::string&) const override;
+
+    std::string getName() const override;
 
 public:
 

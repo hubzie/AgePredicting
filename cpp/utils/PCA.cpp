@@ -8,6 +8,8 @@
 using namespace Eigen;
 using namespace std;
 
+const std::string PCA::NAME = "PCA_SAVE_FILE";
+
 void PCA::prepare(const vector<Data>& data, double compression) {
     assert(status == NOT_INITIALIZED);
     assert(!data.empty());

@@ -1,13 +1,37 @@
 #include"MaxPoolingLayer.hpp"
 
+#include<fstream>
+
 using namespace Eigen;
 using namespace std;
+
+const std::string MaxPoolingLayer::NAME = "MAX_POOLING_LAYER";
+
+void MaxPoolingLayer::load(const string& path) {
+    ifstream file(path);
+    assert(file.is_open());
+
+    string name;
+    assert(file >> name);
+    assert(name == NAME);
+
+    assert(file >> inputSize.first >> inputSize.second);
+    assert(file >> poolSize.first >> poolSize.second);
+}
+
+void MaxPoolingLayer::save(const string& path) const {
+    ofstream file(path);
+    file << NAME << "\n";
+    file << inputSize.first << " " << inputSize.second << "\n";
+    file << poolSize.first << " " << poolSize.second << "\n";
+}
+
+string MaxPoolingLayer::getName() const { return NAME; }
 
 MaxPoolingLayer::MaxPoolingLayer(pair<int,int> inputSize, pair<int,int> poolSize):
     inputSize(inputSize), poolSize(poolSize) {
     assert(inputSize.first % poolSize.first == 0);
     assert(inputSize.second % poolSize.second == 0);
-
 }
 
 pair<int, int> MaxPoolingLayer::getInputSize() const { return inputSize; }

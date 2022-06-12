@@ -5,9 +5,19 @@
 #include"Layer.hpp"
 
 class ConvolutionalLayer : public Layer {
+    friend class CNN;
+    static const std::string NAME;
+
     std::pair<int,int> inputSize, kernelSize;
     Eigen::MatrixXd W;
     double b;
+
+    ConvolutionalLayer() = default;
+
+    void load(const std::string&) override;
+    void save(const std::string&) const override;
+
+    std::string getName() const override;
 
 public:
 

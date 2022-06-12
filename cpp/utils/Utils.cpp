@@ -43,9 +43,8 @@ static vector<Data> readFromFile(const string& path, bool isParsed) {
             // Ignore ethnicity, gender and img_name
             parser >> junk >> junk >> junk;
         }
+        
         double value;
-        int it = 0;
-
         buff.clear();
         while(parser >> value)
             buff.push_back(value);

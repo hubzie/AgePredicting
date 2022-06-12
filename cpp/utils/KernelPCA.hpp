@@ -28,5 +28,3 @@ public:
 
     void save(const std::string&);
 };
-
-const std::string KernelPCA::NAME = "KERNEL_PCA_SAVE_FILE";

@@ -1,7 +1,30 @@
 #include"SigmoidLayer.hpp"
 
+#include<fstream>
+
 using namespace Eigen;
 using namespace std;
+
+const std::string SigmoidLayer::NAME = "SIGMOID_LAYER";
+
+void SigmoidLayer::load(const string& path) {
+    ifstream file(path);
+    assert(file.is_open());
+
+    string name;
+    assert(file >> name);
+    assert(name == NAME);
+
+    assert(file >> size.first >> size.second);
+}
+
+void SigmoidLayer::save(const string& path) const {
+    ofstream file(path);
+    file << NAME << "\n";
+    file << size.first << " " << size.second << "\n";
+}
+
+string SigmoidLayer::getName() const { return NAME; }
 
 SigmoidLayer::SigmoidLayer(pair<int,int> size): size(size) {}
 

@@ -1,9 +1,41 @@
 #include"ConvolutionalLayer.hpp"
 
+#include<fstream>
 #include<random>
 
 using namespace Eigen;
 using namespace std;
+
+const std::string ConvolutionalLayer::NAME = "CONVOLUTIONAL_LAYER";
+
+void ConvolutionalLayer::load(const string& path) {
+    ifstream file(path);
+    assert(file.is_open());
+
+    string name;
+    assert(file >> name);
+    assert(name == NAME);
+
+    assert(file >> inputSize.first >> inputSize.second);
+    assert(file >> kernelSize.first >> kernelSize.second);
+
+    W = MatrixXd(kernelSize.first, kernelSize.second);
+    for(int i=0;i<W.rows();i++)
+        for(int j=0;j<W.cols();j++)
+            assert(file >> W(i,j));
+    assert(file >> b);
+}
+
+void ConvolutionalLayer::save(const string& path) const {
+    ofstream file(path);
+    file << NAME << "\n";
+    file << inputSize.first << " " << inputSize.second << "\n";
+    file << kernelSize.first << " " << kernelSize.second << "\n";
+    file << W << "\n";
+    file << b << "\n";
+}
+
+string ConvolutionalLayer::getName() const { return NAME; }
 
 ConvolutionalLayer::ConvolutionalLayer(pair<int,int> inputSize, pair<int,int> kernelSize):
         inputSize(inputSize), kernelSize(kernelSize),

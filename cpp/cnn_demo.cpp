@@ -10,6 +10,26 @@
 
 using namespace std;
 
+const int CLASS_ZERO = 23;
+const int CLASS_ONE = 34;
+
+static void evaluate(const CNN& model, const vector<Data>& train, const vector<Data>& test) {
+    cerr << "Evaluating..." << endl;
+    {
+        double acc = 0;
+        for(auto& d : train)
+            if(d.y == model.predict(d.x)) acc++;
+        cout << "Training set accuracy = " << 100.0 * acc / train.size() << "%\n";
+    }
+
+    {
+        double acc = 0;
+        for(auto& d : test)
+            if(d.y == model.predict(d.x)) acc++;
+        cout << "Test set accuracy = " << 100.0 * acc / test.size() << "%\n";
+    }
+}
+
 vector<Data> load_pca() {
     cerr << "Loading data..." << endl;
 
@@ -18,7 +38,7 @@ vector<Data> load_pca() {
 
     data.erase(remove_if(data.begin(),
                          data.end(),
-                         [](const Data& x){ return x.y != 23 && x.y != 34; }),
+                         [](const Data& x){ return x.y != CLASS_ZERO && x.y != CLASS_ONE; }),
                data.end());
     return data;
 }
@@ -36,7 +56,7 @@ vector<Data> load_kpca() {
 
         data.erase(remove_if(data.begin(),
                              data.end(),
-                             [](const Data &x) { return x.y != 23 && x.y != 34; }),
+                             [](const Data &x) { return x.y != CLASS_ZERO && x.y != CLASS_ONE; }),
                    data.end());
 
         {
@@ -71,7 +91,7 @@ void pure_nn(vector<Data> data) {
 
     cerr << "Building CNN..." << endl;
     int inputSize = data[0].x.size();
-    CNN model({inputSize, 1});
+    CNN model(make_pair(inputSize, 1));
     model.addLayer(new FullConnectedLayer(inputSize, 200));
     model.addLayer(new ReLuLayer({200, 1}));
     model.addLayer(new FullConnectedLayer(200, 50));
@@ -82,23 +102,10 @@ void pure_nn(vector<Data> data) {
     cerr << "Training..." << endl;
     model.train(train);
 
-    cerr << "Evaluating..." << endl;
-    {
-        double acc = 0;
-        for(auto& d : train)
-            if(d.y == model.predict(d.x)) acc++;
-        cerr << "Training set accuracy = " << 100.0 * acc / train.size() << "%\n";
-    }
-
-    {
-        double acc = 0;
-        for(auto& d : test)
-            if(d.y == model.predict(d.x)) acc++;
-        cerr << "Test set accuracy = " << 100.0 * acc / test.size() << "%\n";
-    }
+    evaluate(model, train, test);
 }
 
-void cnn() {
+void cnn(bool loadBest) {
     cerr << "Loading data..." << endl;
 
     vector<Data> data;
@@ -115,7 +122,7 @@ void cnn() {
 
         data.erase(remove_if(data.begin(),
                              data.end(),
-                             [](const Data &x) { return x.y != 23 && x.y != 34; }),
+                             [](const Data &x) { return x.y != CLASS_ZERO && x.y != CLASS_ONE; }),
                    data.end());
 
         {
@@ -147,52 +154,46 @@ void cnn() {
         cerr << "\t" << k << " : " << v << "\n";
     cerr << "### DATASET ###\n" << flush;
 
-
-
     auto [train, test] = split(data, 0.66);
 
-    cerr << "Building CNN..." << endl;
-    CNN model({48*48, 1});
+    if (loadBest) {
+        cout << "Loading best..." << endl;
+        CNN model("../../demo/best_cnn/");
+        evaluate(model, train, test);
+    } else {
+        cerr << "Building CNN..." << endl;
+        CNN model(make_pair(48 * 48, 1));
 
-    model.addLayer(new ReshapeLayer({48*48, 1}, {48, 48}));
+        model.addLayer(new ReshapeLayer({48 * 48, 1}, {48, 48}));
 
-    model.addLayer(new ConvolutionalLayer({48, 48}, {5, 5}));
-    model.addLayer(new SigmoidLayer({44, 44}));
+        model.addLayer(new ConvolutionalLayer({48, 48}, {5, 5}));
+        model.addLayer(new SigmoidLayer({44, 44}));
 
-    model.addLayer(new ConvolutionalLayer({44, 44}, {5, 5}));
-    model.addLayer(new MaxPoolingLayer({40, 40}, {2, 2}));
-    model.addLayer(new SigmoidLayer({20, 20}));
+        model.addLayer(new ConvolutionalLayer({44, 44}, {5, 5}));
+        model.addLayer(new MaxPoolingLayer({40, 40}, {2, 2}));
+        model.addLayer(new SigmoidLayer({20, 20}));
 
-    model.addLayer(new ConvolutionalLayer({20, 20}, {5, 5}));
-    model.addLayer(new AveragePoolingLayer({16, 16}, {2, 2}));
-    model.addLayer(new SigmoidLayer({8, 8}));
+        model.addLayer(new ConvolutionalLayer({20, 20}, {5, 5}));
+        model.addLayer(new AveragePoolingLayer({16, 16}, {2, 2}));
+        model.addLayer(new SigmoidLayer({8, 8}));
 
-    model.addLayer(new ReshapeLayer({8, 8}, {8*8, 1}));
+        model.addLayer(new ReshapeLayer({8, 8}, {8 * 8, 1}));
 
-    model.addLayer(new FullConnectedLayer(8*8, 30));
-    model.addLayer(new SigmoidLayer({30, 1}));
+        model.addLayer(new FullConnectedLayer(8 * 8, 30));
+        model.addLayer(new ReLuLayer({30, 1}));
 
-    model.addLayer(new FullConnectedLayer(30, 16));
-    model.addLayer(new SigmoidLayer({16, 1}));
+        model.addLayer(new FullConnectedLayer(30, 16));
+        model.addLayer(new SigmoidLayer({16, 1}));
 
-    model.addLayer(new FullConnectedLayer(16, M.size()));
+        model.addLayer(new FullConnectedLayer(16, M.size()));
 
-    cerr << "Training..." << endl;
-    model.train(train);
+        cerr << "Training..." << endl;
+        model.train(train);
 
-    cerr << "Evaluating..." << endl;
-    {
-        double acc = 0;
-        for(auto& d : train)
-            if(d.y == model.predict(d.x)) acc++;
-        cout << "Training set accuracy = " << 100.0 * acc / train.size() << "%\n";
-    }
+        evaluate(model, train, test);
 
-    {
-        double acc = 0;
-        for(auto& d : test)
-            if(d.y == model.predict(d.x)) acc++;
-        cout << "Test set accuracy = " << 100.0 * acc / test.size() << "%\n";
+        cerr << "Saving..." << endl;
+        model.save("../../demo/cnn_dir/");
     }
 }
 
@@ -202,8 +203,9 @@ int main() {
     srand(time(nullptr));
 
     //pure_nn(load_pca());
-    pure_nn(load_kpca());
-    //cnn();
+    //pure_nn(load_kpca());
+    cnn(false);
+    //cnn(true);
 
     return 0;
 }

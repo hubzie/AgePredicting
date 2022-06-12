@@ -1,7 +1,30 @@
 #include"ReLuLayer.hpp"
 
+#include<fstream>
+
 using namespace Eigen;
 using namespace std;
+
+const std::string ReLuLayer::NAME = "RELU_LAYER";
+
+void ReLuLayer::load(const string& path) {
+    ifstream file(path);
+    assert(file.is_open());
+
+    string name;
+    assert(file >> name);
+    assert(name == NAME);
+
+    assert(file >> size.first >> size.second);
+}
+
+void ReLuLayer::save(const string& path) const {
+    ofstream file(path);
+    file << NAME << "\n";
+    file << size.first << " " << size.second << "\n";
+}
+
+string ReLuLayer::getName() const { return NAME; }
 
 ReLuLayer::ReLuLayer(pair<int,int> size): size(size) {}
 

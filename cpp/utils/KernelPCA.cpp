@@ -8,6 +8,8 @@
 using namespace Eigen;
 using namespace std;
 
+const std::string KernelPCA::NAME = "KERNEL_PCA_SAVE_FILE";
+
 static MatrixXd meanRow(MatrixXd X) {
     for(int i=0;i<X.rows();i++) {
         double val = X.row(i).mean();

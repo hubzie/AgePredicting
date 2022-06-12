@@ -21,5 +21,3 @@ public:
 
     void save(const std::string&);
 };
-
-const std::string PCA::NAME = "PCA_SAVE_FILE";
