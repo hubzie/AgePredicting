@@ -10,7 +10,7 @@
 
 class MultiClassKernelSVM : public Model {
     Kernel K;
-    const int classes;
+    int classes;
     std::vector<KernelSVM> machines;
     std::vector<std::pair<int, int>> tree;
 
@@ -19,6 +19,8 @@ class MultiClassKernelSVM : public Model {
     void _train(const std::vector<Data> &training, const std::vector<Data> &validation) override;
     void _save(const std::string &filename) const override;
     [[nodiscard]] int _call(const Data &input) const override;
+    void _load(std::ifstream &file);
 public:
     explicit MultiClassKernelSVM(Kernel K, const int &classes = 2);
+
 };

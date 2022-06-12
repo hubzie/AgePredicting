@@ -30,7 +30,11 @@ add_library(model SHARED model/Model.cpp)
 target_link_libraries(model Eigen3::Eigen)
 
 # SVM
-add_library(lsvm SHARED svm/LinearSVM.cpp svm/MultiClassLinearSVM.cpp svm/KernelSVM.cpp svm/MultiClassKernelSVM.cpp)
+add_library(lsvm SHARED svm/LinearSVM.cpp
+        svm/MultiClassLinearSVM.cpp
+        svm/KernelSVM.cpp
+        svm/MultiClassKernelSVM.cpp
+        )
 target_link_libraries(lsvm model utils)
 
 # CNN

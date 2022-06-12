@@ -55,6 +55,25 @@ void MultiClassKernelSVM::_save(const std::string &filename) const {
     file.close();
 }
 
+void MultiClassKernelSVM::_load(std::ifstream &file) {
+    if (!file.is_open())
+        throw FileNotFound();
+
+    int size;
+
+    file >> classes >> size;
+    tree.resize(size);
+    for (auto &[x, y] : tree)
+        file >> x >> y;
+    machines.clear();
+    std::string line;
+    std::getline(file, line);
+    for (int i = 0; i < tree.size(); ++i) {
+        machines.emplace_back(K);
+        machines.back().load(file);
+    }
+}
+
 int MultiClassKernelSVM::_call(const Data &input) const {
     int root = (int)tree.size() - 1;
     while (root >= 0)

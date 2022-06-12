@@ -119,3 +119,29 @@ pair<vector<Data>, vector<Data>> split(const vector<Data>& data, float frac) {
 
     return {a, b};
 }
+
+// returns vector of age group splits. e.g. {3, 5, 10} means groups are [1,3), [3, 5), [5, 10), [10,...)
+std::vector<int> equalGroups(std::vector<Data> data, const int &numGroups) {
+    std::sort(data.begin(), data.end(), [](const Data &a, const Data &b) -> bool {
+        return a.y < b.y;
+    });
+
+    const int target = (int)data.size() / numGroups;
+    int size = 0;
+
+    std::vector<int> splits;
+    for (int i = 1, j = 0; j < (int)data.size(); ++i) {
+        int old_size = size;
+        while (j < (int)data.size() && data[j].y <= i)
+            ++size, ++j;
+        if (size > target && old_size <= target) {
+            splits.push_back(size - target < target - old_size ? i + 1 : i);
+            size = 0;
+        }
+    }
+    std::cerr << "Splits:";
+    for (int &i : splits)
+        std::cerr << ' ' << i;
+    std::cerr << '\n';
+    return splits;
+}

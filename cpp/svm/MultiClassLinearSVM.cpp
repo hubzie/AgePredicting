@@ -16,10 +16,10 @@ void MultiClassLinearSVM::split(std::vector<Data> training, const std::vector<Da
         std::for_each(training.begin(), training.end(), [&](Data &x) -> void {
             x.y = x.y < m ? -1 : 1;
         });
-        std::cout << "splitting at " << m << '\n';
-        machines.emplace_back(width);
+        std::cout << "Splitting at " << m << '\n';
+        machines.emplace_back(width, minC, maxC, step);
         machines.back().train(training, validation);
-        std::cout << "done splitting at " << m << '\n';
+        std::cout << "Done splitting at " << m << '\n';
         return;
     }
 
@@ -31,8 +31,10 @@ void MultiClassLinearSVM::split(std::vector<Data> training, const std::vector<Da
     std::for_each(training.begin(), training.end(), [&](Data &x) -> void {
         x.y = x.y < m ? -1 : 1;
     });
-    machines.emplace_back(width);
+    std::cout << "Splitting at " << m << '\n';
+    machines.emplace_back(width, minC, maxC, step);
     machines.back().train(training, validation);
+    std::cout << "Done splitting at " << m << '\n';
 }
 
 void MultiClassLinearSVM::_train(const std::vector<Data> &training, const std::vector<Data> &validation) {
@@ -52,6 +54,27 @@ void MultiClassLinearSVM::_save(const std::string &filename) const {
     file.close();
 }
 
+
+void MultiClassLinearSVM::_load(std::ifstream &file) {
+    if (!file.is_open())
+        throw FileNotFound();
+
+    int size;
+
+    file >> classes >> width >> size;
+    tree.resize(size);
+    for (auto &[x, y] : tree)
+        file >> x >> y;
+    machines.clear();
+    std::string line;
+    std::getline(file, line);
+    for (int i = 0; i < tree.size(); ++i) {
+        machines.emplace_back(width);
+        machines.back().load(file);
+    }
+}
+
+
 int MultiClassLinearSVM::_call(const Data &input) const {
     int root = (int)tree.size() - 1;
     while (root >= 0)
@@ -59,6 +82,6 @@ int MultiClassLinearSVM::_call(const Data &input) const {
     return -1 - root;
 }
 
-MultiClassLinearSVM::MultiClassLinearSVM(const int &classes, const int &width) : classes(classes), width(width) {
+MultiClassLinearSVM::MultiClassLinearSVM(const int &classes, const int &width, const double &minC, const double &maxC, const double &step) : classes(classes), width(width), minC(minC), maxC(maxC), step(step) {
 
 }

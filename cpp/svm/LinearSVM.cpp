@@ -14,6 +14,12 @@ inline double LinearSVM::place(const Data &input) const {
     return w.dot(input.x) - b;
 }
 
+inline double LinearSVM::bestError(const std::vector<Data> &input) const {
+    return (double) std::transform_reduce(input.cbegin(), input.cend(), 0, std::plus<>(), [&](const Data &d) -> size_t {
+        return d.y != (_w.dot(d.x) - _b > 0 ? 1 : -1);
+    }) / (double) input.size();
+}
+
 const double eps = 1e-3;
 
 bool LinearSVM::update(const int &i1, const int &i2, const double &E1, const double &E2, const std::vector<Data> &training) {
@@ -124,6 +130,18 @@ bool LinearSVM::examineExample(const int &i2, const double &E2, const std::vecto
 }
 
 void LinearSVM::_train(const std::vector<Data> &training, const std::vector<Data> &validation) {
+    for (C = minC; C < maxC; C *= step) {
+        run(training);
+        if (error(validation) + eps < bestError(validation)) {
+            _w = w;
+            _b = b;
+        }
+    }
+    w = _w;
+    b = _b;
+}
+
+void LinearSVM::run(const std::vector<Data> &training) {
     a.assign(training.size(), 0.0);
     w.setZero();
 
@@ -155,6 +173,34 @@ void LinearSVM::_save(const std::string &filename) const {
     file.close();
 }
 
-LinearSVM::LinearSVM(const int &width, const double &C): w(Eigen::VectorXd::Zero(width)), C(C), b(0.0), gen(std::chrono::system_clock::now().time_since_epoch().count()) {
+void LinearSVM::_load(std::ifstream &file) {
+    if (!file.is_open())
+        throw FileNotFound();
+
+    std::string line;
+    std::getline(file, line);
+    std::stringstream parser(line);
+
+    std::vector<double> in(1);
+    while (parser >> in.back())
+        in.push_back(0);
+    in.pop_back();
+
+    b = in.back();
+    in.pop_back();
+    w.resize(in.size());
+    for (int i = 0; i < in.size(); ++i)
+        w[i] = in[i];
+}
+
+LinearSVM::LinearSVM(const int &width, const double &minC, const double &maxC, const double &step):
+w(Eigen::VectorXd::Zero(width)),
+_w(Eigen::VectorXd::Zero(width)),
+b(0.0),
+_b(0.0),
+minC(minC),
+maxC(maxC),
+step(step),
+gen(std::chrono::system_clock::now().time_since_epoch().count()) {
 
 }

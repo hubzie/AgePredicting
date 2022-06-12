@@ -29,6 +29,7 @@ class KernelSVM : public Model {
     void _train(const std::vector<Data> &training, const std::vector<Data> &validation) override;
     [[nodiscard]] int _call(const Data &input) const override;
     void _save(const std::string &filename) const override;
+    void _load(std::ifstream &file) override;
 
 public:
     [[nodiscard]] inline const std::vector<double> & getA() const {
@@ -37,6 +38,7 @@ public:
     [[nodiscard]] inline const double & getB() const {
         return b;
     }
-    explicit KernelSVM(Kernel K, const double &C = 70);
+
+    explicit KernelSVM(Kernel K, const double &C = 1);
     ~KernelSVM() override = default;
 };

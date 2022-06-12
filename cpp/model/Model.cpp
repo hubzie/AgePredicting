@@ -7,3 +7,9 @@ double Model::_error(const std::vector<Data> &test) const {
       return d.y != (*this)(d);
   }) / (double) test.size();
 }
+
+double Model::_distance(const std::vector<Data> &test) const {
+    return (double) std::transform_reduce(test.cbegin(), test.cend(), 0, std::plus<>(), [&](const Data &d) -> int {
+        return std::abs(d.y - (*this)(d));
+    }) / (double) test.size();
+}

@@ -188,6 +188,23 @@ void KernelSVM::_save(const std::string &filename) const {
     file.close();
 }
 
+void KernelSVM::_load(std::ifstream &file) {
+    if (!file.is_open())
+        throw FileNotFound();
+
+    std::string line;
+    std::getline(file, line);
+    std::stringstream parser(line);
+
+    a.resize(1);
+    while (parser >> a.back())
+        a.push_back(0);
+    a.pop_back();
+
+    b = a.back();
+    a.pop_back();
+}
+
 KernelSVM::KernelSVM(Kernel K, const double &C):
     K(std::move(K)),
     C(C), b(0.0),
