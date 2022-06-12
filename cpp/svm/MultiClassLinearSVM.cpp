@@ -16,10 +16,8 @@ void MultiClassLinearSVM::split(std::vector<Data> training, const std::vector<Da
         std::for_each(training.begin(), training.end(), [&](Data &x) -> void {
             x.y = x.y < m ? -1 : 1;
         });
-        std::cout << "Splitting at " << m << '\n';
         machines.emplace_back(width, minC, maxC, step);
         machines.back().train(training, validation);
-        std::cout << "Done splitting at " << m << '\n';
         return;
     }
 
@@ -31,10 +29,8 @@ void MultiClassLinearSVM::split(std::vector<Data> training, const std::vector<Da
     std::for_each(training.begin(), training.end(), [&](Data &x) -> void {
         x.y = x.y < m ? -1 : 1;
     });
-    std::cout << "Splitting at " << m << '\n';
     machines.emplace_back(width, minC, maxC, step);
     machines.back().train(training, validation);
-    std::cout << "Done splitting at " << m << '\n';
 }
 
 void MultiClassLinearSVM::_train(const std::vector<Data> &training, const std::vector<Data> &validation) {

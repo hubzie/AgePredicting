@@ -15,13 +15,10 @@ class KernelSVM : public Model {
 
     std::mt19937 gen;
     std::vector<double> a, _a;
-    std::list<int> non_zero, _nz;
     std::list<std::pair<int, double>> unbound;
     std::vector<Data> X;
     Eigen::MatrixXd Gram;
-    int zeros;
 
-    inline void clean();
     [[nodiscard]] inline double bestError(const std::vector<Data> &input) const;
     [[nodiscard]] inline double place(const Data &input) const;
     [[nodiscard]] inline double place(const int &idx) const;

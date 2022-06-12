@@ -8,7 +8,7 @@
 #include "LinearSVM.hpp"
 #include "KernelSVM.hpp"
 
-constexpr double GAMMA = 5;
+constexpr double GAMMA = 3;
 
 double gauss(const Eigen::VectorXd &a, const Eigen::VectorXd &b) {
     if (&a == &b)
@@ -108,13 +108,13 @@ void lsvm() {
 //    assignGroups(data);
     for (auto &r : data)
         --r.y;
-    auto [train, data2] = split(data, .3);
+    auto [train, data2] = split(data, .1);
     auto [val, test] = split(data2, .5);
 
     auto start = std::chrono::high_resolution_clock::now();
 
 //    MultiClassLinearSVM l_svm(ageGroup(120) + 1, train[0].x.rows());
-    MultiClassLinearSVM l_svm(116, train[0].x.rows(), 512, pow(2, 10), 2);
+    MultiClassLinearSVM l_svm(116, train[0].x.rows(), 8, 256, 2);
     l_svm.train(train, val);
     l_svm.save("../../out/l_svm.params");
 
@@ -129,14 +129,16 @@ void lsvm() {
 
 void ksvm() {
     auto data = readData();
+    for (auto &r : data)
+        --r.y;
 //    assignGroups(data);
     auto [train, data2] = split(data, .1);
     auto [val, test] = split(data2, .5);
 
     auto start = std::chrono::high_resolution_clock::now();
 
-//    MultiClassKernelSVM k_svm(gauss, ageGroup(120) + 1, .25, 4);
-    MultiClassKernelSVM k_svm(gauss, 116, .25, 1);
+//    MultiClassKernelSVM k_svm(gauss, ageGroup(120) + 1, 8, 64);
+    MultiClassKernelSVM k_svm(gauss, 116, 30, 31);
     k_svm.train(train, val);
     k_svm.save("../../out/k_svm.params");
 
@@ -150,7 +152,7 @@ void ksvm() {
 }
 
 int main() {
-//    lsvm();
+    lsvm();
 //    load_lsvm();
-    ksvm();
+//    ksvm();
 }

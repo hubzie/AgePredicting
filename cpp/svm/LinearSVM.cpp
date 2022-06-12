@@ -144,6 +144,7 @@ void LinearSVM::_train(const std::vector<Data> &training, const std::vector<Data
 void LinearSVM::run(const std::vector<Data> &training) {
     a.assign(training.size(), 0.0);
     w.setZero();
+    unbound.clear();
 
     bool change = false, examineAll = true;
     while (change || examineAll) {

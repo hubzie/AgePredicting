@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 project(cpp)
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O3 -march=native")
 
 # Multithreading
 find_package(OpenMP)
@@ -77,6 +77,10 @@ target_link_libraries(reg_cnn_demo ${LIBS})
 # Generating data
 add_executable(prepare_data prepare_data.cpp)
 target_link_libraries(prepare_data ${LIBS})
+
+add_executable(run_lsvm run_lsvm.cpp)
+target_link_libraries(run_lsvm ${LIBS})
+
 
 add_executable(run_nn run_nn.cpp)
 target_link_libraries(run_nn ${LIBS})

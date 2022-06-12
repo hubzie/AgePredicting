@@ -11,41 +11,29 @@ int KernelSVM::_call(const Data &input) const {
     return place(input) > 0 ? 1 : -1;
 }
 
-const int MAX_ZEROES = 10;
-
-const double eps = 1e-1;
+const double eps = 1e-2;
 
 inline double KernelSVM::place(const Data &input) const {
     double res = -b;
-    for (const int &it : non_zero)
-        res += a[it] * X[it].y * K(X[it].x, input.x);
+    for (size_t i = 0; i < a.size(); ++i)
+        res += a[i] * X[i].y * K(X[i].x, input.x);
     return res;
 }
 
 inline double KernelSVM::bestError(const std::vector<Data> &input) const {
     return (double) std::transform_reduce(input.cbegin(), input.cend(), 0, std::plus<>(), [&](const Data &d) -> size_t {
         double res = -_b;
-        for (const int &it : _nz)
-            res += _a[it] * X[it].y * K(X[it].x, d.x);
+        for (size_t i = 0; i < _a.size(); ++i)
+            res += _a[i] * X[i].y * K(X[i].x, d.x);
         return d.y != (res > 0 ? 1 : -1);
     }) / (double) input.size();
 }
 
 inline double KernelSVM::place(const int &idx) const {
     double res = -b;
-    for (const int &it : non_zero)
-        res += a[it] * X[it].y * Gram(it, idx);
+    for (size_t i = 0; i < a.size(); ++i)
+        res += a[i] * X[i].y * Gram(i, idx);
     return res;
-}
-
-inline void KernelSVM::clean() {
-    for (auto it = non_zero.begin(); it != non_zero.end(); ++it) {
-        if (a[*it] < eps) {
-            it = non_zero.erase(it);
-            continue;
-        }
-    }
-    zeros = 0;
 }
 
 bool KernelSVM::update(const int &i1, const int &i2, const double &E1, const double &E2, const std::vector<Data> &training) {
@@ -58,8 +46,7 @@ bool KernelSVM::update(const int &i1, const int &i2, const double &E1, const dou
     if (L + eps > H)
         return false;
 
-//    const double K11 = Gram(i1, i1), K12 = Gram(i1, i2), K22 = Gram(i2, i2);
-    const double K11 = K(training[i1].x, training[i1].x), K12 = K(training[i1].x, training[i2].x), K22 = K(training[i2].x, training[i2].x);
+    const double K11 = Gram(i1, i1), K12 = Gram(i1, i2), K22 = Gram(i2, i2);
     const double eta = K11 + K22 - 2.0 * K12;
 
     double a2;
@@ -94,20 +81,8 @@ bool KernelSVM::update(const int &i1, const int &i2, const double &E1, const dou
     if (!onBound(a2) && onBound(a[i2]))
         unbound.emplace_back(i2, E2);
 
-    if (a[i1] < eps && a1 > eps)
-        non_zero.push_back(i1);
-    if (a[i2] < eps && a2 > eps)
-        non_zero.push_back(i2);
-
-    zeros += (a1 < eps && a[i1] > eps);
-    zeros += (a2 < eps && a[i2] > eps);
-    if (zeros > MAX_ZEROES)
-        clean();
-
-    std::cerr << a1 << ", " << a2 << " | " << a[i1] << ", " << a[i2] << ", " << i1 << ", " << i2 << std::endl;
     a[i1] = a1;
     a[i2] = a2;
-
 
     refreshCache(training);
     return true;
@@ -123,7 +98,7 @@ inline bool KernelSVM::onBound(const double &x) const {
     return x < eps || x > C - eps;
 }
 
-const double tol = 1e-1;
+const double tol = 1e-2;
 
 bool KernelSVM::examineExample(const int &i2, const double &E2, const std::vector<Data> &training) {
     const double &y2 = training[i2].y;
@@ -169,19 +144,15 @@ bool KernelSVM::examineExample(const int &i2, const double &E2, const std::vecto
 
 void KernelSVM::run(const std::vector<Data> &training) {
     a.assign(training.size(), 0);
-    zeros = 0;
     b = 0;
-    non_zero.clear();
+    unbound.clear();
 
     int iter = 0;
     bool change = false, examineAll = true;
     while (change || examineAll) {
-        if (++iter % 10000 == 0) {
-            std::cerr << iter << " , " << b << " , " << _b << std::endl;
-            for (auto &c : a)
-                std::cerr << c << ' ';
-            std::cerr << std::endl;
-        }
+        if (++iter % 10000 == 0)
+            std::cerr << "Kernel SVM: iteration #" << iter << std::endl;
+
         change = false;
         if (examineAll)
             for (int i = 0; i < (int)training.size(); ++i)
@@ -201,6 +172,8 @@ void KernelSVM::run(const std::vector<Data> &training) {
 
 void KernelSVM::_train(const std::vector<Data> &training, const std::vector<Data> &validation) {
     X = training;
+    _b = 0;
+    _a.assign(training.size(), 0);
     Gram.resize(training.size(), training.size());
     for (int i = 0; i < Gram.rows(); ++i)
         for (int j = 0; j < Gram.cols(); ++j)
@@ -210,12 +183,10 @@ void KernelSVM::_train(const std::vector<Data> &training, const std::vector<Data
     for (C = minC; C < maxC; C *= step) {
         run(training);
         if (error(validation) + eps < bestError(validation)) {
-            _nz = non_zero;
             _b = b;
             _a = a;
         }
     }
-    non_zero = _nz;
     b = _b;
     a = _a;
     Gram.resize(0, 0);
