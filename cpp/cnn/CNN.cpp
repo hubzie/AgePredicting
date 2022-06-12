@@ -64,8 +64,8 @@ void CNN::addLayer(Layer* layer) {
 }
 
 void CNN::train(const std::vector<Data>& data) {
-    cerr << "CNN: Layers count = " << layers.size() << endl;
-    cerr << "CNN: Training data set size = " << data.size() << endl;
+    //cerr << "CNN: Layers count = " << layers.size() << endl;
+    //cerr << "CNN: Training data set size = " << data.size() << endl;
 
     random_device rd;
     mt19937 g(rd());
@@ -78,7 +78,7 @@ void CNN::train(const std::vector<Data>& data) {
     int size = layers.size();
     vector<MatrixXd> input(size + 1), error(size + 1);
 
-    for(int it=1;it<=50*1000;it++) {
+    for(int it=1;it<=10*1000;it++) {
         auto& d = data[getIdx(0, data.size()-1)];
 
         input[0] = d.x;
@@ -102,7 +102,7 @@ void CNN::train(const std::vector<Data>& data) {
                 if(d.y == predict(d.x)) cnt++;
 
             double accuracy = 100.0 * cnt / data.size();
-            cerr << "CNN: Iteration #" << it << ", accuracy = " << accuracy << "%" << endl;
+            //cerr << "CNN: Iteration #" << it << ", accuracy = " << accuracy << "%" << endl;
         }
     }
 }

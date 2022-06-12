@@ -74,5 +74,9 @@ target_link_libraries(cnn_demo ${LIBS})
 add_executable(reg_cnn_demo regression_cnn_demo.cpp)
 target_link_libraries(reg_cnn_demo ${LIBS})
 
+# Generating data
 add_executable(prepare_data prepare_data.cpp)
 target_link_libraries(prepare_data ${LIBS})
+
+add_executable(run_regression_nn run_regression_nn.cpp)
+target_link_libraries(run_regression_nn ${LIBS})

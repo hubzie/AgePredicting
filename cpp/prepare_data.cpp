@@ -17,7 +17,7 @@ double kernel(double tau, const VectorXd& a, const VectorXd& b) {
 void preparePureData(vector<Data> train, vector<Data> test) {
     cerr << "Save pure data..." << endl;
     const string path = "../../data/pure_data/";
-    filesystem::create_directory(path);
+    filesystem::create_directories(path);
     save(path + "train.data", train);
     save(path + "test.data", test);
 }
@@ -34,7 +34,7 @@ void preparePCAData(vector<Data> train, vector<Data> test) {
 
     cerr << "Save PCA data..." << endl;
     const string path = "../../data/pca_data/";
-    filesystem::create_directory(path);
+    filesystem::create_directories(path);
     save(path + "train.data", train);
     save(path + "test.data", test);
 }
@@ -54,7 +54,7 @@ void prepareKernelPCAData(vector<Data> train, vector<Data> test, double tau, dou
 
     cerr << "Save kernel PCA data..." << endl;
     const string path = "../../data/kernel_pca_data_"+to_string((int) tau)+"/";
-    filesystem::create_directory(path);
+    filesystem::create_directories(path);
     save(path + "train.data", train);
     save(path + "test.data", test);
 }

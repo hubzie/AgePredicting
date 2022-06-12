@@ -66,8 +66,8 @@ void RegressionCNN::addLayer(Layer* layer) {
 void RegressionCNN::train(const std::vector<Data>& data) {
     assert(outputSize == make_pair(1,1));
 
-    cerr << "RegressionCNN: Layers count = " << layers.size() << endl;
-    cerr << "RegressionCNN: Training data set size = " << data.size() << endl;
+    //cerr << "RegressionCNN: Layers count = " << layers.size() << endl;
+    //cerr << "RegressionCNN: Training data set size = " << data.size() << endl;
 
     random_device rd;
     mt19937 g(rd());
@@ -80,7 +80,7 @@ void RegressionCNN::train(const std::vector<Data>& data) {
     int size = layers.size();
     vector<MatrixXd> input(size + 1), error(size + 1);
 
-    for(int it=1;it<=50*1000;it++) {
+    for(int it=1;it<=10*1000;it++) {
         auto& d = data[getIdx(0, data.size()-1)];
 
         input[0] = d.x;
@@ -104,7 +104,7 @@ void RegressionCNN::train(const std::vector<Data>& data) {
                 score += abs(d.y - predict(d.x));
 
             score /= data.size();
-            cerr << "RegressionCNN: Iteration #" << it << ", score = " << score << endl;
+            //cerr << "RegressionCNN: Iteration #" << it << ", score = " << score << endl;
         }
     }
 }
