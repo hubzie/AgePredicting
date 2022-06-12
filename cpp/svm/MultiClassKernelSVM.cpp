@@ -16,10 +16,10 @@ void MultiClassKernelSVM::split(std::vector<Data> training, const std::vector<Da
         std::for_each(training.begin(), training.end(), [&](Data &x) -> void {
             x.y = x.y < m ? -1 : 1;
         });
-        std::cout << "splitting at " << m << '\n';
-        machines.emplace_back(K);
+        std::cerr << "Splitting at " << m << std::endl;
+        machines.emplace_back(K, minC, maxC, step);
         machines.back().train(training, validation);
-        std::cout << "done splitting at " << m << '\n';
+        std::cerr << "Done spliiting at " << m << std::endl;
         return;
     }
 
@@ -31,8 +31,10 @@ void MultiClassKernelSVM::split(std::vector<Data> training, const std::vector<Da
     std::for_each(training.begin(), training.end(), [&](Data &x) -> void {
         x.y = x.y < m ? -1 : 1;
     });
+    std::cerr << "Splitting at " << m << std::endl;
     machines.emplace_back(K);
     machines.back().train(training, validation);
+    std::cerr << "Done spliiting at " << m << std::endl;
 }
 
 void MultiClassKernelSVM::_train(const std::vector<Data> &training, const std::vector<Data> &validation) {
@@ -69,7 +71,7 @@ void MultiClassKernelSVM::_load(std::ifstream &file) {
     std::string line;
     std::getline(file, line);
     for (int i = 0; i < tree.size(); ++i) {
-        machines.emplace_back(K);
+        machines.emplace_back(K, minC, maxC, step);
         machines.back().load(file);
     }
 }
@@ -81,6 +83,6 @@ int MultiClassKernelSVM::_call(const Data &input) const {
     return -1 - root;
 }
 
-MultiClassKernelSVM::MultiClassKernelSVM(Kernel K, const int &classes) : K(std::move(K)), classes(classes) {
+MultiClassKernelSVM::MultiClassKernelSVM(Kernel K, const int &classes, const double &minC, const double &maxC, const double &step) : K(std::move(K)), classes(classes), minC(minC), maxC(maxC), step(step) {
 
 }

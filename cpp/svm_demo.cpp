@@ -8,7 +8,7 @@
 #include "LinearSVM.hpp"
 #include "KernelSVM.hpp"
 
-constexpr double GAMMA = 2;
+constexpr double GAMMA = 5;
 
 double gauss(const Eigen::VectorXd &a, const Eigen::VectorXd &b) {
     if (&a == &b)
@@ -39,10 +39,30 @@ void assignGroups(std::vector<Data> &data) {
         r.y = ageGroup(r.y);
 }
 
+std::vector<Data> kpcaData() {
+    std::cerr << "Loading data..." << std::endl;
+
+    std::vector<Data> data;
+    try {
+        data = fromParsedFile("../../demo/kpca/svm.data");
+    } catch(const std::exception&) {
+        std::cerr << "Prepare data..." << std::endl;
+
+        data = fromParsedFile("../../demo/kpca/data.data");
+
+        {
+            std::ofstream file("../../demo/kpca/svm.data");
+            for (auto &d: data)
+                file << d << "\n";
+        }
+    }
+    return data;
+}
+
 std::vector<Data> readData() {
     std::cerr << "Reading data..." << std::endl;
     try {
-        auto data = fromParsedFile("../../demo/svm.data");
+        auto data = fromParsedFile("../../demo/pca/svm.data");
         return data;
     } catch (const FileNotFound &e) {
         auto data = fromFile("../../data/age_gender.csv");
@@ -60,7 +80,7 @@ std::vector<Data> readData() {
         }
         standardize(data, mean(data), deviation(data));
         {
-            std::ofstream demo("../../demo/svm.data");
+            std::ofstream demo("../../demo/pca/svm.data");
             for (auto &r: data)
                 demo << r << "\n";
         }
@@ -85,10 +105,7 @@ void load_lsvm() {
 
 void lsvm() {
     auto data = readData();
-//    std::vector<int> groups = equalGroups(data);
 //    assignGroups(data);
-//    for (auto &r : data)
-//        r.y = (short)(std::lower_bound(groups.begin(), groups.end(), r.y) - groups.begin());
     for (auto &r : data)
         --r.y;
     auto [train, data2] = split(data, .3);
@@ -97,7 +114,7 @@ void lsvm() {
     auto start = std::chrono::high_resolution_clock::now();
 
 //    MultiClassLinearSVM l_svm(ageGroup(120) + 1, train[0].x.rows());
-    MultiClassLinearSVM l_svm(116, train[0].x.rows(), .25, pow(2, 8), 2);
+    MultiClassLinearSVM l_svm(116, train[0].x.rows(), 512, pow(2, 10), 2);
     l_svm.train(train, val);
     l_svm.save("../../out/l_svm.params");
 
@@ -112,16 +129,15 @@ void lsvm() {
 
 void ksvm() {
     auto data = readData();
-    std::vector<int> groups = equalGroups(data);
 //    assignGroups(data);
-    for (auto &r : data)
-        r.y = (short)(std::lower_bound(groups.begin(), groups.end(), r.y) - groups.begin());
-    auto [train, test] = split(data, .1);
+    auto [train, data2] = split(data, .1);
+    auto [val, test] = split(data2, .5);
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    MultiClassKernelSVM k_svm(gauss, ageGroup(120) + 1);
-    k_svm.train(train);
+//    MultiClassKernelSVM k_svm(gauss, ageGroup(120) + 1, .25, 4);
+    MultiClassKernelSVM k_svm(gauss, 116, .25, 1);
+    k_svm.train(train, val);
     k_svm.save("../../out/k_svm.params");
 
     auto end = std::chrono::high_resolution_clock::now();
@@ -134,7 +150,7 @@ void ksvm() {
 }
 
 int main() {
-    lsvm();
+//    lsvm();
 //    load_lsvm();
-//    ksvm();
+    ksvm();
 }
