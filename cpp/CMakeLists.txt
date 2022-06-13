@@ -96,3 +96,6 @@ target_link_libraries(run_regression_nn ${LIBS})
 
 add_executable(run_ridge run_ridge.cpp)
 target_link_libraries(run_ridge ${LIBS})
+
+add_executable(error_nn error_nn.cpp)
+target_link_libraries(error_nn ${LIBS})
