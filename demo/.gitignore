@@ -1,3 +1,4 @@
 *
 !.gitignore
-!.plot_pca.py
+!plot_pca.py
+!plot_error.py
