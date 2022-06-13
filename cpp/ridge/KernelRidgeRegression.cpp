@@ -15,6 +15,13 @@ double KernelRidgeRegression::error(const std::vector<Data> &input) const {
     }) / (double)input.size();
 }
 
+double KernelRidgeRegression::calc(const Data &input) const {
+    Eigen::VectorXd kap(tr.size());
+    for (int i = 0; i < kap.size(); ++i)
+        kap[i] = K(tr[i].x, input.x);
+    return alfa.dot(kap) + offset;
+}
+
 double KernelRidgeRegression::trainingError(const Eigen::MatrixXd &cache, const Eigen::VectorXd &target, const Eigen::VectorXd &a) {
     return (a * cache - target).squaredNorm();
 }
@@ -39,6 +46,7 @@ void KernelRidgeRegression::setOffset() {
     offset /= (double)tr.size();
     for (auto &i : tr)
         i.y -= offset;
+//    std::cout << "OFFSET: " << offset << std::endl;
 }
 
 void KernelRidgeRegression::train(const std::vector<Data> &train, const std::vector<Data> &val) {

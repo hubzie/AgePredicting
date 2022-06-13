@@ -15,7 +15,7 @@ const double step = 0.1;
 double gauss(const Eigen::VectorXd &a, const Eigen::VectorXd &b) {
     if (&a == &b)
         return 1;
-    return exp(-(a - b).squaredNorm() * 10);
+    return exp(-(a - b).squaredNorm() * 1);
 }
 
 void saveScore(const string& path, const vector<double>& score) {
@@ -41,6 +41,30 @@ void addOne(std::vector<Data> &data) {
     }
 }
 
+std::vector<double> createHistogram(RidgeRegression *reg, const std::vector<Data> &data) {
+    std::vector<double> hist(116, 0);
+    std::vector<int> cnt(116, 0);
+    for (auto &i : data) {
+        ++cnt[i.y - 1];
+        hist[i.y - 1] += std::abs(reg->calc(i) - i.y);
+    }
+    for (int i = 0; i < 116; ++i)
+        hist[i] /= (double)(cnt[i] == 0 ? 1 : cnt[i]);
+    return hist;
+}
+
+std::vector<double> createHistogram(KernelRidgeRegression *reg, const std::vector<Data> &data) {
+    std::vector<double> hist(102, 0);
+    std::vector<int> cnt(102, 0);
+    for (auto &i : data) {
+        ++cnt[i.y];
+        hist[i.y] += std::abs(reg->calc(i) - i.y);
+    }
+    for (int i = 0; i < 102; ++i)
+        hist[i] /= (double)(cnt[i] == 0 ? 1 : cnt[i]);
+    return hist;
+}
+
 void test(const string& path, const string& data_path, const float &trf = 0.6) {
     cerr << "### TEST RIDGE REGRESSION ###" << endl;
     cerr << "Dataset " << data_path << endl;
@@ -54,6 +78,7 @@ void test(const string& path, const string& data_path, const float &trf = 0.6) {
     std::vector<double> curve_train, curve_val, curve_test;
     RidgeRegression *best = nullptr;
     double best_score = numeric_limits<double>::max();
+    std::vector<double> hist;
 
     for(double frac=step;frac<=1.0;frac+=step) {
         double score_ridge = numeric_limits<double>::max(), score_train = 0, score_val = 0, score_test = 0;
@@ -85,6 +110,7 @@ void test(const string& path, const string& data_path, const float &trf = 0.6) {
                     if (score < best_score) {
                         swap(best, tmpBest);
                         best_score = score;
+                        hist = createHistogram(best, test);
                     }
                 }
                 delete model;
@@ -104,9 +130,11 @@ void test(const string& path, const string& data_path, const float &trf = 0.6) {
     saveScore(path+"lin/train_curve.data", curve_train);
     saveScore(path+"lin/test_curve.data", curve_test);
     saveScore(path+"lin/val_curve.data", curve_val);
+    saveScore(path+"lin/hist.data", hist);
 
     delete best;
 }
+
 
 
 void test_k(const string& path, const string& data_path, const float &trf = 0.4) {
@@ -121,8 +149,9 @@ void test_k(const string& path, const string& data_path, const float &trf = 0.4)
     std::vector<double> curve_train, curve_val, curve_test;
     KernelRidgeRegression *best = nullptr;
     double best_score = numeric_limits<double>::max();
+    std::vector<double> hist;
 
-    for(double frac=step;frac<=0.31;frac+=step) {
+    for(double frac=step;frac<=0.51;frac+=step) {
         double score_ridge = numeric_limits<double>::max(), score_train = 0, score_val = 0, score_test = 0;
 
         KernelRidgeRegression *tmpBest = nullptr;
@@ -136,7 +165,7 @@ void test_k(const string& path, const string& data_path, const float &trf = 0.4)
             stdize(train, val, test);
 
             {
-                auto model = new KernelRidgeRegression(gauss, .1, .5, 2);
+                auto model = new KernelRidgeRegression(gauss, 1000, 5000, 2);
                 model->train(train, val);
                 double score = model->error(test);
                 score_test += score;
@@ -148,6 +177,7 @@ void test_k(const string& path, const string& data_path, const float &trf = 0.4)
                     if (score < best_score) {
                         swap(best, tmpBest);
                         best_score = score;
+//                        hist = createHistogram(best, test);
                     }
                 }
                 delete model;
@@ -167,6 +197,7 @@ void test_k(const string& path, const string& data_path, const float &trf = 0.4)
     saveScore(path+"kernel/train_curve.data", curve_train);
     saveScore(path+"kernel/test_curve.data", curve_test);
     saveScore(path+"kernel/val_curve.data", curve_val);
+    saveScore(path+"kernel/hist.data", hist);
 
     delete best;
 }
@@ -177,10 +208,12 @@ int main() {
     const string path = "../../models/ridge/";
     filesystem::create_directories(path);
 
-    test_k(path+"pca/", "../../data/pca_data/");
-//    test(path+"kpca_500/", "../../data/kernel_pca_data_500/");
-//    test(path+"kpca_1000/", "../../data/kernel_pca_data_1000/");
-//    test_k(path+"kpca_2000/", "../../data/kernel_pca_data_2000/");
+//    test_k(path+"pca/", "../../data/pca_data/", 0.1);
+    test(path+"pca/", "../../data/pca_data/");
+//    test(path+"kpca_500/", "../../data/kernel_pca_data_500/", 0.1);
+//    test_k(path+"kpca_1000/", "../../data/kernel_pca_data_1000/", 0.1);
+//    test_k(path+"kpca_2000/", "../../data/kernel_pca_data_2000/", 0.1);
+//    test(path+"kpca_2000/", "../../data/kernel_pca_data_2000/");
 
     return 0;
 }

@@ -243,7 +243,7 @@ int main() {
 //    test(path+"kpca_1000/bucket/", "../../data/kernel_pca_data_1000/", filter_bucket, 8);
 //    test(path+"kpca_2000/bucket/", "../../data/kernel_pca_data_2000/", filter_bucket, 8, 0.1);
 
-    dist(path+"pca/all/", "../../data/pca_data/", filter_all, 102, 0.4);
+    dist(path+"pca/all/", "../../data/pca_data/", filter_all, 102, 0.6);
 //    test(path+"kpca_500/all/", "../../data/kernel_pca_data_500/", filter_all, 102);
 //    test(path+"kpca_1000/all/", "../../data/kernel_pca_data_1000/", filter_all, 102);
 //    test(path+"kpca_2000/all/", "../../data/kernel_pca_data_2000/", filter_all, 102, 0.1);

@@ -15,6 +15,10 @@ double RidgeRegression::trainingError(const std::vector<Data> &input, const Eige
     });
 }
 
+double RidgeRegression::calc(const Data &input) const {
+    return theta.dot(input.x);
+}
+
 
 static std::pair<Eigen::MatrixXd, Eigen::VectorXd> toMatrix(const std::vector<Data> &X) {
     const int n = X.size(), m = X[0].x.size();
