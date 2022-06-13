@@ -180,9 +180,13 @@ void KernelSVM::_train(const std::vector<Data> &training, const std::vector<Data
             Gram(i, j) = K(training[i].x, training[j].x);
     std::cerr << "Gram Matrix computed" << std::endl;
 
-    for (C = minC; C < maxC; C *= step) {
+    C = minC;
+    run(training);
+    _b = b;
+    _a = a;
+    for (C = minC + step; C < maxC; C *= step) {
         run(training);
-        if (error(validation) + eps < bestError(validation)) {
+        if (error(validation) < bestError(validation)) {
             _b = b;
             _a = a;
         }

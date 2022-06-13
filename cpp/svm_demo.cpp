@@ -114,7 +114,7 @@ void lsvm() {
     auto start = std::chrono::high_resolution_clock::now();
 
 //    MultiClassLinearSVM l_svm(ageGroup(120) + 1, train[0].x.rows());
-    MultiClassLinearSVM l_svm(116, train[0].x.rows(), 8, 256, 2);
+    MultiClassLinearSVM l_svm(116, train[0].x.rows(), 1, 257, 2);
     l_svm.train(train, val);
     l_svm.save("../../out/l_svm.params");
 
@@ -138,7 +138,7 @@ void ksvm() {
     auto start = std::chrono::high_resolution_clock::now();
 
 //    MultiClassKernelSVM k_svm(gauss, ageGroup(120) + 1, 8, 64);
-    MultiClassKernelSVM k_svm(gauss, 116, 30, 31);
+    MultiClassKernelSVM k_svm(gauss, 116, 1, 1.1);
     k_svm.train(train, val);
     k_svm.save("../../out/k_svm.params");
 

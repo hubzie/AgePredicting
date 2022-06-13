@@ -130,7 +130,11 @@ bool LinearSVM::examineExample(const int &i2, const double &E2, const std::vecto
 }
 
 void LinearSVM::_train(const std::vector<Data> &training, const std::vector<Data> &validation) {
-    for (C = minC; C < maxC; C *= step) {
+    C = minC;
+    run(training);
+    _w = w;
+    _b = b;
+    for (C = minC + step; C < maxC; C *= step) {
         run(training);
         if (error(validation) + eps < bestError(validation)) {
             _w = w;

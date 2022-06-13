@@ -3,6 +3,7 @@
 
 #include<filesystem>
 #include<iostream>
+#include <omp.h>
 
 using namespace std;
 
@@ -41,7 +42,7 @@ void test(const string& path, const string& data_path) {
             vector<Data> train(d_train.begin(), d_train.begin() + d_train.size() * frac);
 
             {
-                auto svm = new MultiClassLinearSVM(116, inputSize, 4, 65, 2);
+                auto svm = new MultiClassLinearSVM(116, inputSize, 1, 129, 2);
                 svm->train(train, val);
                 double score = 1 - svm->error(test);
                 if (score < score_svm) {
@@ -62,7 +63,7 @@ void test(const string& path, const string& data_path) {
     }
 
     filesystem::create_directories(path+"l_svm/");
-    best->save(path+"l_svm/");
+    best->save(path+"l_svm/params.out");
     saveScore(path+"l_svm/train_curve.data", curve_train);
     saveScore(path+"l_svm/test_curve.data", curve_test);
     saveScore(path+"l_svm/val_curve.data", curve_val);
