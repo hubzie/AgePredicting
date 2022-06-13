@@ -178,7 +178,6 @@ void KernelSVM::_train(const std::vector<Data> &training, const std::vector<Data
     for (int i = 0; i < Gram.rows(); ++i)
         for (int j = 0; j < Gram.cols(); ++j)
             Gram(i, j) = K(training[i].x, training[j].x);
-    std::cerr << "Gram Matrix computed" << std::endl;
 
     C = minC;
     run(training);

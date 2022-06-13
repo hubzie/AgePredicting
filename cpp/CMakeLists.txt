@@ -81,6 +81,8 @@ target_link_libraries(prepare_data ${LIBS})
 add_executable(run_lsvm run_lsvm.cpp)
 target_link_libraries(run_lsvm ${LIBS})
 
+add_executable(run_ksvm run_ksvm.cpp)
+target_link_libraries(run_ksvm ${LIBS})
 
 add_executable(run_nn run_nn.cpp)
 target_link_libraries(run_nn ${LIBS})
