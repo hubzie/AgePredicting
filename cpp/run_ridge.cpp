@@ -15,7 +15,7 @@ const double step = 0.1;
 double gauss(const Eigen::VectorXd &a, const Eigen::VectorXd &b) {
     if (&a == &b)
         return 1;
-    return exp(-(a - b).squaredNorm() * .1);
+    return exp(-(a - b).squaredNorm() * 10);
 }
 
 void saveScore(const string& path, const vector<double>& score) {
@@ -177,10 +177,10 @@ int main() {
     const string path = "../../models/ridge/";
     filesystem::create_directories(path);
 
-//    test(path+"pca/", "../../data/pca_data/");
+    test_k(path+"pca/", "../../data/pca_data/");
 //    test(path+"kpca_500/", "../../data/kernel_pca_data_500/");
 //    test(path+"kpca_1000/", "../../data/kernel_pca_data_1000/");
-    test_k(path+"kpca_2000/", "../../data/kernel_pca_data_2000/");
+//    test_k(path+"kpca_2000/", "../../data/kernel_pca_data_2000/");
 
     return 0;
 }

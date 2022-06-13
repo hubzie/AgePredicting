@@ -66,7 +66,7 @@ void MultiClassKernelSVM::_load(std::ifstream &file) {
     machines.clear();
     std::string line;
     std::getline(file, line);
-    for (int i = 0; i < tree.size(); ++i) {
+    for (int i = 0; i < classes - 1; ++i) {
         machines.emplace_back(K, minC, maxC, step);
         machines.back().load(file);
     }

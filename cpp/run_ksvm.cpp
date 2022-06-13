@@ -109,14 +109,16 @@ void test(const string& path, const string& data_path, const function<int(int)> 
         for (int i = 1; i <= REPS; i++) {
             shuffle(data);
             auto [d_train, rest] = split(data, trf);
-            auto [rest2, junk] = split(rest, 0.3);
-            auto [val, test] = split(rest2, 0.5);
+//            auto [rest2, junk] = split(rest, 0.3);
+//            auto [val, test] = split(rest2, 0.5);
+            auto [val, test] = split(rest, 0.5);
             cerr << "Iteration #" << i << " - Testing frac = " << 100.0 * frac << "%" << endl;
             vector<Data> train(d_train.begin(), d_train.begin() + d_train.size() * frac);
             stdize(train, val, test);
 
             {
-                auto svm = new MultiClassKernelSVM(gauss3, classes, .25, 65, 2);
+//                auto svm = new MultiClassKernelSVM(gauss3, classes, .25, 65, 2);
+                auto svm = new MultiClassKernelSVM(gauss3, classes, .25, 1000, 2);
                 svm->train(train, val);
                 double score = 1 - svm->error(test);
                 score_test1 += score;
@@ -133,7 +135,8 @@ void test(const string& path, const string& data_path, const function<int(int)> 
                 delete svm;
             }
             {
-                auto svm = new MultiClassKernelSVM(gauss01, classes, .25, 65, 2);
+//                auto svm = new MultiClassKernelSVM(gauss01, classes, .25, 65, 2);
+                auto svm = new MultiClassKernelSVM(gauss01, classes, .25, 1000, 2);
                 svm->train(train, val);
                 double score = 1 - svm->error(test);
                 score_test2 += score;
@@ -177,10 +180,103 @@ void test(const string& path, const string& data_path, const function<int(int)> 
     delete best2;
 }
 
+void dist(const string& path, const string& data_path, const function<int(int)> &func, const int &classes, const float &trf = 0.6) {
+    cerr << "### TEST Kernel SVM ###" << endl;
+    cerr << "Dataset " << data_path << endl;
+
+    cerr << "Loading data..." << endl;
+    auto data = fromParsedFile(data_path+"train.data");
+    auto data2 = fromParsedFile(data_path+"test.data");
+    data.insert(data.end(), data2.begin(), data2.end());
+    filter(data, func);
+
+    std::vector<double> curve_train1, curve_val1, curve_test1, curve_train2, curve_val2, curve_test2;
+    MultiClassKernelSVM *best1 = nullptr, *best2 = nullptr;
+
+    for(double frac=step;frac<=1.0;frac+=step) {
+        double score_svm1 = numeric_limits<double>::min(), score_train1 = 0, score_val1 = 0, score_test1 = 0;
+        double score_svm2 = numeric_limits<double>::min(), score_train2 = 0, score_val2 = 0, score_test2 = 0;
+
+        MultiClassKernelSVM *tmpBest1 = nullptr, *tmpBest2 = nullptr;
+        double best_score1 = numeric_limits<double>::max(), best_score2 = numeric_limits<double>::max();
+
+        for (int i = 1; i <= REPS; i++) {
+            shuffle(data);
+            auto [d_train, rest] = split(data, trf);
+            auto [rest2, junk] = split(rest, 0.3);
+            auto [val, test] = split(rest2, 0.5);
+//            auto [val, test] = split(rest, 0.5);
+            cerr << "Iteration #" << i << " - Testing frac = " << 100.0 * frac << "%" << endl;
+            vector<Data> train(d_train.begin(), d_train.begin() + d_train.size() * frac);
+            stdize(train, val, test);
+
+            {
+//                auto svm = new MultiClassKernelSVM(gauss3, classes, .25, 65, 2);
+                auto svm = new MultiClassKernelSVM(gauss3, classes, .25, 65, 2);
+                svm->train(train, val);
+                double score = svm->distance(test);
+                score_test1 += score;
+                score_train1 += svm->distance(train);
+                score_val1 += svm->distance(val);
+                if (score < score_svm1) {
+                    score_svm1 = score;
+                    swap(tmpBest1, svm);
+                    if (score < best_score1) {
+                        swap(best1, tmpBest1);
+                        best_score1 = score;
+                    }
+                }
+                delete svm;
+            }
+            {
+//                auto svm = new MultiClassKernelSVM(gauss01, classes, .25, 65, 2);
+                auto svm = new MultiClassKernelSVM(gauss01, classes, .25, 65, 2);
+                svm->train(train, val);
+                double score = svm->distance(test);
+                score_test2 += score;
+                score_train2 += svm->distance(train);
+                score_val2 += svm->distance(val);
+                if (score < score_svm2) {
+                    score_svm2 = score;
+                    swap(tmpBest2, svm);
+                    if (score < best_score2) {
+                        swap(best2, tmpBest2);
+                        best_score2 = score;
+                    }
+                }
+                delete svm;
+            }
+        }
+        delete tmpBest1;
+        delete tmpBest2;
+
+        cerr << "Tested frac = " << 100.0 * frac << "%" << endl;
+        cerr << "SVM Score for gamma = 3: " << score_svm1 << ", gamma = 0.1: " << score_svm2 << endl;
+        curve_train1.push_back(score_train1 / REPS);
+        curve_val1.push_back(score_val1 / REPS);
+        curve_test1.push_back(score_test1 / REPS);
+        curve_train2.push_back(score_train2 / REPS);
+        curve_val2.push_back(score_val2 / REPS);
+        curve_test2.push_back(score_test2 / REPS);
+    }
+
+//    filesystem::create_directories(path+"k_svm/");
+//    best1->save(path+"k_svm/params3.out");
+    saveScore(path+"k_svm/train_dist3.data", curve_train1);
+    saveScore(path+"k_svm/test_dist3.data", curve_test1);
+    saveScore(path+"k_svm/val_dist3.data", curve_val1);
+//    best2->save(path+"k_svm/params0.1.out");
+    saveScore(path+"k_svm/train_dist0.1.data", curve_train2);
+    saveScore(path+"k_svm/test_dist0.1.data", curve_test2);
+    saveScore(path+"k_svm/val_dist0.1.data", curve_val2);
+
+    delete best1;
+    delete best2;
+}
 
 
 int main() {
-    cerr << fixed << setprecision(3);
+    cerr << fixed << setprecision(5);
 
     const string path = "../../models/svm/";
     filesystem::create_directories(path);
@@ -198,12 +294,12 @@ int main() {
 //    test(path+"pca/bucket/", "../../data/pca_data/", filter_bucket, 8, 0.1);
 //    test(path+"kpca_500/bucket/", "../../data/kernel_pca_data_500/", filter_bucket, 8);
 //    test(path+"kpca_1000/bucket/", "../../data/kernel_pca_data_1000/", filter_bucket, 8);
-//    test(path+"kpca_2000/bucket/", "../../data/kernel_pca_data_2000/", filter_bucket, 8, 0.1);
+    test(path+"kpca_2000/bucket/", "../../data/kernel_pca_data_2000/", filter_bucket, 8, 0.1);
 
-//    test(path+"pca/all/", "../../data/pca_data/", filter_all, 102, 0.1);
+//    dist(path+"pca/all/", "../../data/pca_data/", filter_all, 102, 0.1);
 //    test(path+"kpca_500/all/", "../../data/kernel_pca_data_500/", filter_all, 102);
 //    test(path+"kpca_1000/all/", "../../data/kernel_pca_data_1000/", filter_all, 102);
-    test(path+"kpca_2000/all/", "../../data/kernel_pca_data_2000/", filter_all, 102, 0.1);
+//    dist(path+"kpca_2000/all/", "../../data/kernel_pca_data_2000/", filter_all, 102, 0.1);
 
     return 0;
 }

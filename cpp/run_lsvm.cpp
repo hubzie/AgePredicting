@@ -140,13 +140,93 @@ void test(const string& path, const string& data_path, const function<int(int)> 
     delete best;
 }
 
+std::vector<double> createHistogram(MultiClassLinearSVM *svm, const std::vector<Data> &data) {
+    std::vector<double> hist(102, 0);
+    std::vector<int> cnt(102, 0);
+    for (auto &i : data) {
+        ++cnt[i.y];
+        hist[i.y] += std::abs((double)(*svm)(i) - i.y);
+    }
+    for (int i = 0; i < 102; ++i)
+        hist[i] /= (double)(cnt[i] == 0 ? 1 : cnt[i]);
+    return hist;
+}
 
+void dist(const string& path, const string& data_path, const function<int(int)> &func, const int &classes, const float &trf = 0.6) {
+    cerr << "### TEST LINEAR SVM ###" << endl;
+    cerr << "Dataset " << data_path << endl;
+
+    cerr << "Loading data..." << endl;
+    auto data = fromParsedFile(data_path+"train.data");
+    auto data2 = fromParsedFile(data_path+"test.data");
+    data.insert(data.end(), data2.begin(), data2.end());
+    filter(data, func);
+
+    int inputSize = data[0].x.size();
+
+    std::vector<double> curve_train, curve_val, curve_test;
+    MultiClassLinearSVM *best = nullptr;
+    double best_score = numeric_limits<double>::max();
+    std::vector<double> hist;
+
+    for(double frac=step;frac<=1.0;frac+=step) {
+        double score_svm = numeric_limits<double>::max(), score_train = 0, score_val = 0, score_test = 0;
+
+        MultiClassLinearSVM *tmpBest = nullptr;
+
+        for (int i = 1; i <= REPS; i++) {
+            shuffle(data);
+            auto [d_train, rest] = split(data, trf);
+            auto [rest2, junk] = split(rest, 0.3);
+            auto [val, test] = split(rest2, 0.5);
+            cerr << "Iteration #" << i << " - Testing frac = " << 100.0 * frac << "%" << endl;
+            vector<Data> train(d_train.begin(), d_train.begin() + d_train.size() * frac);
+            stdize(train, val, test);
+
+            {
+                auto svm = new MultiClassLinearSVM(classes, inputSize, .5, 33, 2);
+                svm->train(train, val);
+                double score = svm->distance(test);
+                score_test += score;
+                score_train += svm->distance(train);
+                score_val += svm->distance(val);
+                if (score < score_svm) {
+                    score_svm = score;
+                    swap(tmpBest, svm);
+                    if (score < best_score) {
+                        swap(best, tmpBest);
+                        best_score = score;
+
+                        hist = createHistogram(best, test);
+                    }
+                }
+                delete svm;
+            }
+        }
+        delete tmpBest;
+
+        cerr << "Tested frac = " << 100.0 * frac << "%" << endl;
+        cerr << "Score SVM = " << score_svm << endl;
+        curve_train.push_back(score_train / REPS);
+        curve_val.push_back(score_val / REPS);
+        curve_test.push_back(score_test / REPS);
+    }
+
+//    filesystem::create_directories(path+"l_svm/");
+//    best->save(path+"l_svm/params.out");
+    saveScore(path+"l_svm/train_dist.data", curve_train);
+    saveScore(path+"l_svm/test_dist.data", curve_test);
+    saveScore(path+"l_svm/val_dist.data", curve_val);
+    saveScore(path+"l_svm/hist.data", hist);
+
+    delete best;
+}
 
 int main() {
-    cerr << fixed << setprecision(3);
+    cerr << fixed << setprecision(5);
 
     const string path = "../../models/svm/";
-    filesystem::create_directories(path);
+//    filesystem::create_directories(path);
 
 //    test(path+"pca/2_50/", "../../data/pca_data/", filter_2_50, 2);
 //    test(path+"kpca_500/2_50/", "../../data/kernel_pca_data_500/", filter_2_50, 2);
@@ -163,10 +243,10 @@ int main() {
 //    test(path+"kpca_1000/bucket/", "../../data/kernel_pca_data_1000/", filter_bucket, 8);
 //    test(path+"kpca_2000/bucket/", "../../data/kernel_pca_data_2000/", filter_bucket, 8, 0.1);
 
-    test(path+"pca/all/", "../../data/pca_data/", filter_all, 102, 0.4);
+    dist(path+"pca/all/", "../../data/pca_data/", filter_all, 102, 0.4);
 //    test(path+"kpca_500/all/", "../../data/kernel_pca_data_500/", filter_all, 102);
 //    test(path+"kpca_1000/all/", "../../data/kernel_pca_data_1000/", filter_all, 102);
-    test(path+"kpca_2000/all/", "../../data/kernel_pca_data_2000/", filter_all, 102, 0.4);
+//    test(path+"kpca_2000/all/", "../../data/kernel_pca_data_2000/", filter_all, 102, 0.1);
 
 
     return 0;

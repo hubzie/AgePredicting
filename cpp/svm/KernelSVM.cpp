@@ -11,7 +11,7 @@ int KernelSVM::_call(const Data &input) const {
     return place(input) > 0 ? 1 : -1;
 }
 
-const double eps = 1e-2;
+const double eps = 1e-3;
 
 inline double KernelSVM::place(const Data &input) const {
     double res = -b;
@@ -98,7 +98,7 @@ inline bool KernelSVM::onBound(const double &x) const {
     return x < eps || x > C - eps;
 }
 
-const double tol = 1e-2;
+const double tol = 1e-3;
 
 bool KernelSVM::examineExample(const int &i2, const double &E2, const std::vector<Data> &training) {
     const double &y2 = training[i2].y;
@@ -203,6 +203,8 @@ void KernelSVM::_save(const std::string &filename) const {
     for (const double &c : a)
         file << c << ' ';
     file << b << '\n';
+    for (auto &i : X)
+        file << i << '\n';
     file.close();
 }
 
@@ -221,6 +223,25 @@ void KernelSVM::_load(std::ifstream &file) {
 
     b = a.back();
     a.pop_back();
+
+    for (int i = 0; i < a.size(); ++i) {
+        std::getline(file, line);
+        std::stringstream parser(line);
+        std::vector<double> v(1);
+        while (parser >> v.back())
+            v.push_back(0);
+        v.pop_back();
+        Eigen::VectorXd vec(v.size());
+        for (int j = 0; j < v.size(); ++j)
+            vec[j] = v[j];
+        X.push_back({ vec, 0 });
+    }
+
+    std::cout << b << std::endl;
+//    for (auto &i : a)
+//        std::cerr << i << ' ';
+//    std::cerr << std::endl;
+    std::cerr << a.size() << std::endl;
 }
 
 KernelSVM::KernelSVM(Kernel K, const double &minC, const double &maxC, const double &step):

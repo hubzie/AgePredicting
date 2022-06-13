@@ -151,8 +151,34 @@ void ksvm() {
     std::cerr << "kernel SVM test average distance: " << k_svm.distance(test) << std::endl;
 }
 
+void filter(std::vector<Data>& data, std::function<int(int)> fun) {
+    for(auto& d : data)
+        d.y = fun(d.y);
+
+    data.erase(remove_if(
+            data.begin(),
+            data.end(),
+            [](auto d){ return d.y == -1; }
+    ), data.end());
+}
+
+int func(int x) {
+    if(x == 2) return 0;
+    if(x == 50) return 1;
+    return -1;
+}
+
 int main() {
-    lsvm();
+//    lsvm();
 //    load_lsvm();
 //    ksvm();
+    MultiClassKernelSVM svm(gauss);
+//    svm.load("../../models/svm/kpca_2000/2_50/k_svm/params3.out");
+//    auto data = fromParsedFile("../../data/kernel_pca_data_2000/test.data");
+//    filter(data, func);
+//    std::cout << data[0].x << std::endl;
+
+//    for (auto &i : data)
+//        std::cerr << svm(i) << ' ';
+//    std::cerr << std::endl;
 }
