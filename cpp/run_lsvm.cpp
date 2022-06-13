@@ -7,8 +7,8 @@
 
 using namespace std;
 
-const int REPS = 5;
-const double step = 0.1;
+const int REPS = 3;
+const double step = 0.2;
 
 void filter(vector<Data>& data, function<int(int)> func) {
     for(auto& d : data)
@@ -74,7 +74,7 @@ void stdize(std::vector<Data> &train, std::vector<Data> &val, std::vector<Data> 
     standardize(test, mi, sigma);
 }
 
-void test(const string& path, const string& data_path, const function<int(int)> &func, const int &classes) {
+void test(const string& path, const string& data_path, const function<int(int)> &func, const int &classes, const float &trf = 0.6) {
     cerr << "### TEST LINEAR SVM ###" << endl;
     cerr << "Dataset " << data_path << endl;
 
@@ -97,14 +97,15 @@ void test(const string& path, const string& data_path, const function<int(int)> 
 
         for (int i = 1; i <= REPS; i++) {
             shuffle(data);
-            auto [d_train, rest] = split(data, 0.6);
-            auto [val, test] = split(rest, 0.5);
+            auto [d_train, rest] = split(data, trf);
+            auto [rest2, junk] = split(rest, 0.3);
+            auto [val, test] = split(rest2, 0.5);
             cerr << "Iteration #" << i << " - Testing frac = " << 100.0 * frac << "%" << endl;
             vector<Data> train(d_train.begin(), d_train.begin() + d_train.size() * frac);
             stdize(train, val, test);
 
             {
-                auto svm = new MultiClassLinearSVM(classes, inputSize, .25, 65, 2);
+                auto svm = new MultiClassLinearSVM(classes, inputSize, .5, 33, 2);
                 svm->train(train, val);
                 double score = 1 - svm->error(test);
                 score_test += score;
@@ -147,25 +148,25 @@ int main() {
     const string path = "../../models/svm/";
     filesystem::create_directories(path);
 
-    test(path+"pca/2_50/", "../../data/pca_data/", filter_2_50, 2);
-    test(path+"kpca_500/2_50/", "../../data/kernel_pca_data_500/", filter_2_50, 2);
-    test(path+"kpca_1000/2_50/", "../../data/kernel_pca_data_1000/", filter_2_50, 2);
-    test(path+"kpca_2000/2_50/", "../../data/kernel_pca_data_2000/", filter_2_50, 2);
+//    test(path+"pca/2_50/", "../../data/pca_data/", filter_2_50, 2);
+//    test(path+"kpca_500/2_50/", "../../data/kernel_pca_data_500/", filter_2_50, 2);
+//    test(path+"kpca_1000/2_50/", "../../data/kernel_pca_data_1000/", filter_2_50, 2);
+//    test(path+"kpca_2000/2_50/", "../../data/kernel_pca_data_2000/", filter_2_50, 2);
 
-    test(path+"pca/23_34/", "../../data/pca_data/", filter_23_34, 2);
-    test(path+"kpca_500/23_34/", "../../data/kernel_pca_data_500/", filter_23_34, 2);
-    test(path+"kpca_1000/23_34/", "../../data/kernel_pca_data_1000/", filter_23_34, 2);
-    test(path+"kpca_2000/23_34/", "../../data/kernel_pca_data_2000/", filter_23_34, 2);
+//    test(path+"pca/23_34/", "../../data/pca_data/", filter_23_34, 2);
+//    test(path+"kpca_500/23_34/", "../../data/kernel_pca_data_500/", filter_23_34, 2);
+//    test(path+"kpca_1000/23_34/", "../../data/kernel_pca_data_1000/", filter_23_34, 2);
+//    test(path+"kpca_2000/23_34/", "../../data/kernel_pca_data_2000/", filter_23_34, 2);
 
-    test(path+"pca/bucket/", "../../data/pca_data/", filter_bucket, 8);
-    test(path+"kpca_500/bucket/", "../../data/kernel_pca_data_500/", filter_bucket, 8);
-    test(path+"kpca_1000/bucket/", "../../data/kernel_pca_data_1000/", filter_bucket, 8);
-    test(path+"kpca_2000/bucket/", "../../data/kernel_pca_data_2000/", filter_bucket, 8);
+//    test(path+"pca/bucket/", "../../data/pca_data/", filter_bucket, 8, 0.3);
+//    test(path+"kpca_500/bucket/", "../../data/kernel_pca_data_500/", filter_bucket, 8);
+//    test(path+"kpca_1000/bucket/", "../../data/kernel_pca_data_1000/", filter_bucket, 8);
+//    test(path+"kpca_2000/bucket/", "../../data/kernel_pca_data_2000/", filter_bucket, 8, 0.1);
 
-    test(path+"pca/all/", "../../data/pca_data/", filter_all, 102);
-    test(path+"kpca_500/all/", "../../data/kernel_pca_data_500/", filter_all, 102);
-    test(path+"kpca_1000/all/", "../../data/kernel_pca_data_1000/", filter_all, 102);
-    test(path+"kpca_2000/all/", "../../data/kernel_pca_data_2000/", filter_all, 102);
+    test(path+"pca/all/", "../../data/pca_data/", filter_all, 102, 0.4);
+//    test(path+"kpca_500/all/", "../../data/kernel_pca_data_500/", filter_all, 102);
+//    test(path+"kpca_1000/all/", "../../data/kernel_pca_data_1000/", filter_all, 102);
+    test(path+"kpca_2000/all/", "../../data/kernel_pca_data_2000/", filter_all, 102, 0.4);
 
 
     return 0;

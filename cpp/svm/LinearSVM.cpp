@@ -20,7 +20,7 @@ inline double LinearSVM::bestError(const std::vector<Data> &input) const {
     }) / (double) input.size();
 }
 
-const double eps = 1e-3;
+const double eps = 1e-2;
 
 bool LinearSVM::update(const int &i1, const int &i2, const double &E1, const double &E2, const std::vector<Data> &training) {
     const double &y1 = training[i1].y, &y2 = training[i2].y;
@@ -85,7 +85,7 @@ inline bool LinearSVM::onBound(const double &x) const {
     return x < eps || x > C - eps;
 }
 
-const double tol = 1e-3;
+const double tol = 1e-2;
 
 bool LinearSVM::examineExample(const int &i2, const double &E2, const std::vector<Data> &training) {
     const double &y2 = training[i2].y;
@@ -149,6 +149,7 @@ void LinearSVM::run(const std::vector<Data> &training) {
     a.assign(training.size(), 0.0);
     w.setZero();
     unbound.clear();
+    b = 0;
 
     bool change = false, examineAll = true;
     while (change || examineAll) {

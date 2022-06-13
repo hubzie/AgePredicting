@@ -37,6 +37,10 @@ add_library(lsvm SHARED svm/LinearSVM.cpp
         )
 target_link_libraries(lsvm model utils)
 
+# Ridge
+add_library(lridge SHARED ridge/RidgeRegression.cpp ridge/KernelRidgeRegression.cpp)
+target_link_libraries(lridge utils)
+
 # CNN
 add_library(lcnn SHARED cnn/CNN.cpp cnn/RegressionCNN.cpp
         cnn/layers/AveragePoolingLayer.cpp
@@ -50,10 +54,10 @@ add_library(lcnn SHARED cnn/CNN.cpp cnn/RegressionCNN.cpp
 target_link_libraries(lcnn Eigen3::Eigen)
 
 # Directories
-include_directories(utils model svm cnn)
+include_directories(utils model svm cnn ridge)
 
 # Libraries
-set(LIBS Eigen3::Eigen utils model lpca lkernelpca lsvm lcnn)
+set(LIBS Eigen3::Eigen utils model lpca lkernelpca lsvm lcnn lridge)
 
 # Executables
 add_executable(parser parser.cpp)
@@ -89,3 +93,6 @@ target_link_libraries(run_nn ${LIBS})
 
 add_executable(run_regression_nn run_regression_nn.cpp)
 target_link_libraries(run_regression_nn ${LIBS})
+
+add_executable(run_ridge run_ridge.cpp)
+target_link_libraries(run_ridge ${LIBS})
