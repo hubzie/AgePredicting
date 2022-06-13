@@ -9,7 +9,7 @@
 
 using namespace std;
 
-const int REPS = 50;
+const int REPS = 10;
 const double step = 0.1;
 
 double evaluate(const CNN& model, const vector<Data>& data) {
@@ -264,8 +264,8 @@ void test_cnn(const string& path, const string& data_path, function<int(int)> fu
     saveScore(path+"cnn1/train_curve.data", curve_train_cnn1);
     saveScore(path+"cnn1/test_curve.data", curve_test_cnn1);
 
-    filesystem::create_directories(path+"reg_cnn2/");
-    best_cnn2->save(path+"reg_cnn2/");
+    filesystem::create_directories(path+"cnn2/");
+    best_cnn2->save(path+"cnn2/");
     saveScore(path+"cnn2/train_curve.data", curve_train_cnn2);
     saveScore(path+"cnn2/test_curve.data", curve_test_cnn2);
 
@@ -316,7 +316,7 @@ int filter_all(int x) {
 int main() {
     cerr << fixed << setprecision(3);
 
-    const string path = "../../models/regression_nn/";
+    const string path = "../../models/nn/";
     filesystem::create_directories(path);
 
     test_nn(path+"pca/2_50/", "../../data/pca_data/", filter_2_50, 2);
@@ -329,7 +329,7 @@ int main() {
     test_nn(path+"kpca_500/23_34/", "../../data/kernel_pca_data_500/", filter_23_34, 2);
     test_nn(path+"kpca_1000/23_34/", "../../data/kernel_pca_data_1000/", filter_23_34, 2);
     test_nn(path+"kpca_2000/23_34/", "../../data/kernel_pca_data_2000/", filter_23_34, 2);
-    test_cnn(path+"pure/2_50/", "../../data/pure_data/", filter_2_50, 2);
+    test_cnn(path+"pure/23_34/", "../../data/pure_data/", filter_2_50, 2);
 
     test_nn(path+"pca/bucket/", "../../data/pca_data/", filter_bucket, 8);
     test_nn(path+"kpca_500/bucket/", "../../data/kernel_pca_data_500/", filter_bucket, 8);

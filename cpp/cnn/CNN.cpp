@@ -74,11 +74,11 @@ void CNN::train(const std::vector<Data>& data) {
     };
 
     // Forward
-    double step = 0.02;
+    double step = 0.1;
     int size = layers.size();
     vector<MatrixXd> input(size + 1), error(size + 1);
 
-    for(int it=1;it<=10*1000;it++) {
+    for(int it=1;it<=50*1000;it++) {
         auto& d = data[getIdx(0, data.size()-1)];
 
         input[0] = d.x;
